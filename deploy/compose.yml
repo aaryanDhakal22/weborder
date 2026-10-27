@@ -1,0 +1,18 @@
+# Example only (not deployed). Secrets come from Doppler in quicc's setup.
+services:
+  storefront:
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    restart: unless-stopped
+    environment:
+      BASE_DOMAIN: quiccpos.com
+      ADMIN_HOST: stores-admin.quiccpos.com
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set it}
+      SECRET: ${STOREFRONT_SECRET:?set it}
+      DATA_SOURCE: mock          # main once /site/v1 exists (docs/MAIN-API.md)
+      DEMO_FLOOR: real
+    volumes:
+      - storefront-data:/data
+    ports:
+      - "127.0.0.1:3000:3000"
+volumes:
+  storefront-data:

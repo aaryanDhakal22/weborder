@@ -1,0 +1,35 @@
+# Example only (not deployed). Caddy in front of the storefront on the home server.
+# Published snapshots are served straight from disk; everything else goes to Node.
+# Traefik/Cloudflare terminate *.quiccpos.com today; this is the shape of the storefront block.
+
+{
+	on_demand_tls {
+		# Custom domains: only issue certificates for hosts the storefront knows.
+		ask http://127.0.0.1:3000/__quicc/domain-check
+	}
+}
+
+*.quiccpos.com, https:// {
+	tls {
+		on_demand
+	}
+	encode zstd br gzip
+
+	# Snapshot lookup needs host → store id, which only Node knows; keep it simple and let Node
+	# serve snapshots (≈1–2 ms from pre-compressed files). Static build assets are served here.
+	handle /_app/immutable/* {
+		root * /srv/storefront/build/client
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server { precompressed br gzip }
+	}
+	handle /fonts/* {
+		root * /srv/storefront/build/client
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server { precompressed br gzip }
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3000 {
+			header_up X-Forwarded-Host {host}
+		}
+	}
+}
