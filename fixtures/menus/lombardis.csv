@@ -1,0 +1,283 @@
+menu,category,item,price,printer,description,sizes,times_ordered,last_ordered
+Main,Pizza,Regular Tomato Cheese Pizza,6.99,Pizza,,10 Small $6.99 | 14 Large $11.99 | 12 Medium $9.99 | 16 X-Large $12.99,496,2026-10-15T23:57:00-0400
+Main,Pizza,(12 Medium) Regular Tomato Cheese,19.99,Pizza,,Serving $19.99,490,2026-10-14T21:16:00-0400
+Main,Pizza,(14 Large) Regular Tomato Cheese,25.99,Pizza,,Serving $25.99,275,2026-10-15T18:54:00-0400
+Main,Pizza,(16 X-Large) Regular Tomato Cheese,14.99,Pizza,,Serving $14.99 | Serving $36.99,260,2026-10-16T00:20:00-0400
+Main,Pizza,(10 Small) Regular Tomato Cheese,6.99,Pizza,,Serving $6.99,170,2026-10-15T23:11:00-0400
+Main,Pizza,Build Your Own Pizza,15.99,Pizza,,12 Medium $15.99 | 16 X-Large $20.99 | 14 Large $17.99,161,2026-10-14T18:13:00-0400
+Main,Pizza,(1st) 12 Medium - Regular Tomato Cheese,18.99,Pizza,,Serving $18.99,140,2026-10-12T19:26:00-0400
+Main,Pizza,(2nd) 12 Medium - Regular Tomato Cheese,0.00,Pizza,,Serving $0.00,140,2026-10-12T19:26:00-0400
+Main,Pizza,(1st) 16 X-Large - Regular Tomato Cheese,27.99,Pizza,,Serving $27.99,89,2026-10-15T22:54:00-0400
+Main,Pizza,(2nd) 16 X-Large - Regular Tomato Cheese,0.00,Pizza,,Serving $0.00,89,2026-10-15T22:54:00-0400
+Main,Pizza,(1st) 14 Large - Regular Tomato Cheese,25.99,Pizza,,Serving $25.99,87,2026-10-13T17:29:00-0400
+Main,Pizza,(2nd) 14 Large - Regular Tomato Cheese,0.00,Pizza,,Serving $0.00,87,2026-10-13T17:29:00-0400
+Main,Pizza,Meat Lovers Pizza,15.99,Pizza,,12 Medium $15.99 | 14 Large $17.99 | 16 X-Large $20.99,45,2026-10-12T23:37:00-0400
+Main,Pizza,Veggie Pizza,14.99,Pizza,,12 Medium $14.99 | 14 Large $17.99 | 16 X-Large $19.99,41,2026-10-10T23:21:00-0400
+Main,Pizza,Sweet Potato Pie,2.99,Pizza,,Serving $2.99,38,2026-10-12T17:11:00-0400
+Main,Pizza,Supreme Pizza,15.99,Pizza,,12 Medium $15.99 | 14 Large $18.99 | 16 X-Large $21.99,26,2026-10-07T17:54:00-0400
+Main,Pizza,Pizza Fries,4.99,Pizza,,Serving $4.99,24,2026-10-09T21:57:00-0400
+Main,Pizza,Hawaiian Style Pizza,16.99,Pizza,,14 Large $16.99 | 12 Medium $14.99 | 16 X-Large $19.99,22,2026-10-10T23:21:00-0400
+Main,Pizza,BBQ Grilled Chicken Pizza,14.99,Pizza,,12 Medium $14.99 | 16 X-Large $20.99 | 14 Large $17.99,17,2026-10-15T18:28:00-0400
+Main,Pizza,White Veggie Pizza,14.99,Pizza,,12 Medium $14.99 | 14 Large $16.99,17,2026-10-10T23:21:00-0400
+Main,Pizza,Meat Lovers,13.99,Pizza,,Serving $13.99,15,2026-10-15T15:28:00-0400
+Main,Pizza,White Style Pizza,12.99,Pizza,,14 Large $12.99 | 12 Medium $10.99 | 16 X-Large $15.99,13,2026-09-27T18:22:00-0400
+Main,Pizza,Gluten Free Pizza,8.99,Pizza,,10 Small $8.99,11,2026-09-03T21:10:00-0400
+Main,Pizza,Buffalo Chicken Pizza,14.99,Pizza,,12 Medium $14.99 | 14 Large $16.99 | 16 X-Large $19.99,9,2026-09-30T17:46:00-0400
+Main,Pizza,Sweet Potato Cream Cheese Pie,4.49,Pizza,,Serving $4.49,9,2026-10-09T23:54:00-0400
+Main,Pizza,12 inch pizza,9.99,Pizza,,12 inch $9.99,8,2026-05-09T15:42:14-0400
+Main,Pizza,Pepperoni and Cheese,11.99,Pizza,,Serving $11.99,7,2026-09-16T17:45:00-0400
+Main,Pizza,10 inch pizza,5.99,Pizza,,10 inch $5.99,5,2026-05-09T15:56:47-0400
+Main,Pizza,Ranch Sauce Grilled Chicken Veggie Pizza,21.99,Pizza,,16 X-Large $21.99,4,2026-10-13T22:07:00-0400
+Main,Pizza,Lombardi's Hawaiian Style Pizza,14.99,Pizza,,12 Medium $14.99 | 14 Large $16.99,2,2026-05-12T23:03:29-0400
+Main,Pizza,Margherita Pizza,14.00,Pizza,,Medium $14.00,2,2026-02-07T10:15:00Z
+Main,Pizza,Veggie Lovers,13.99,Pizza,,Serving $13.99,2,2026-07-09T17:31:00-0400
+Main,Subs,8 Sub,19.99,Sub,,Serving $19.99,1129,2026-10-16T00:16:00-0400
+Main,Subs,Cheesesteak Sub,10.99,Sub,,8 $10.99 | 12 $13.99,397,2026-10-14T16:22:00-0400
+Main,Subs,(1st) 8 Sub,27.99,Sub,,Serving $27.99,189,2026-10-15T16:29:00-0400
+Main,Subs,(2nd) 8 Sub,0.00,Sub,,Serving $0.00,189,2026-10-15T16:29:00-0400
+Main,Subs,12 Sub,16.99,Sub,,Serving $16.99,176,2026-10-13T20:09:00-0400
+Main,Subs,Chicken Cheesesteak Sub,10.99,Sub,,8 $10.99 | 12 $13.99,88,2026-10-15T00:15:00-0400
+Main,Subs,Cheeseburger Sub,10.99,Sub,,8 $10.99 | 12 $13.99,56,2026-10-10T00:24:00-0400
+Main,Subs,Italian Cold Sub,10.99,Sub,,8 $10.99 | 12 $13.99,54,2026-10-13T13:02:00-0400
+Main,Subs,Turkey Club Sandwich,11.99,Sub,,Serving $11.99,48,2026-10-02T22:03:00-0400
+Main,Subs,(1st) 12 Sub,33.99,Sub,,Serving $33.99,46,2026-10-15T22:40:00-0400
+Main,Subs,(2nd) 12 Sub,0.00,Sub,,Serving $0.00,46,2026-10-15T22:40:00-0400
+Main,Subs,Steak and Cheese Quesadilla,11.99,Sub,,Serving $11.99,36,2026-10-08T17:09:00-0400
+Main,Subs,Grilled Chicken Ranch Wrap,10.99,Sub,,Serving $10.99,28,2026-10-15T13:41:00-0400
+Main,Subs,Grilled Chicken Caesar Wrap,10.99,Sub,,Serving $10.99,27,2026-10-03T12:29:00-0400
+Main,Subs,Cheesesteak on Pita,10.99,Sub,,Serving $10.99,24,2026-10-01T19:41:00-0400
+Main,Subs,Crispy Chicken Sandwich,6.99,Sub,,Serving $6.99,18,2026-10-10T15:39:00-0400
+Main,Subs,Tuna Sub,11.99,Sub,,8 $11.99 | 12 $15.99,14,2026-10-13T21:51:00-0400
+Main,Subs,Turkey and Cheese Sandwich,6.99,Sub,,Serving $6.99,14,2026-08-18T10:54:00-0400
+Main,Subs,Turkey and Cheese Sub,13.99,Sub,,12 $13.99 | 8 $10.99,14,2026-10-15T22:53:00-0400
+Main,Subs,Buffalo Chicken Wrap,10.99,Sub,,Serving $10.99,13,2026-09-25T19:25:00-0400
+Main,Subs,American Cold Sub,10.99,Sub,,8 $10.99 | 12 $13.99,12,2026-10-04T12:32:00-0400
+Main,Subs,Falafel on Pita,10.99,Sub,,Serving $10.99,12,2026-10-03T17:57:00-0400
+Main,Subs,Chicken Salad Sandwich,6.99,Sub,,Serving $6.99,11,2026-08-26T13:18:00-0400
+Main,Subs,Crispy Chicken Sub,13.99,Sub,,12 $13.99 | 8 $10.99,11,2026-10-15T17:37:00-0400
+Main,Subs,Chicken Steak on Pita,10.99,Sub,,Serving $10.99,10,2026-08-05T22:22:00-0400
+Main,Subs,Grilled Chicken Sub,11.99,Sub,,8 $11.99 | 12 $14.99,10,2026-09-22T19:26:00-0400
+Main,Subs,Chicken Gyro on PIta,10.99,Sub,,Serving $10.99,9,2026-09-26T15:33:00-0400
+Main,Subs,Buffalo Chicken Cheesesteak Sub,10.99,Sub,,8 $10.99 | 12 $13.99,8,2026-10-06T14:24:00-0400
+Main,Subs,Steak on Pizza,15.99,Sub,,12 Medium $15.99 | 16 X-Large $20.99 | 14 Large $18.99,8,2026-09-29T21:09:00-0400
+Main,Subs,B.L.T Sandwich,5.99,Sub,,Serving $5.99,7,2026-06-28T20:29:00-0400
+Main,Subs,Chicken Gyro with Fries,13.99,Sub,,Serving $13.99,7,2026-09-04T14:27:00-0400
+Main,Subs,Italian Cheesesteak Sub,10.99,Sub,,8 $10.99 | 12 $13.99,7,2026-10-01T18:38:00-0400
+Main,Subs,Tuna Salad Sandwich,7.99,Sub,,Serving $7.99,7,2026-10-13T22:06:00-0400
+Main,Subs,Chicken Salad Club Sandwich,11.99,Sub,,Serving $11.99,6,2026-09-20T14:07:00-0400
+Main,Subs,Chicken Filet Sub,13.99,Sub,,12 $13.99 | 8 $10.99,4,2026-10-10T16:11:00-0400
+Main,Subs,Chicken Fillet Sandwich,6.99,Sub,,Serving $6.99,4,2026-07-31T21:52:00-0400
+Main,Subs,Chicken Salad Sub,10.99,Sub,,8 $10.99 | 12 $13.99,4,2026-07-31T11:02:00-0400
+Main,Subs,Grilled Chicken Sandwich,6.99,Sub,,Serving $6.99,4,2026-08-16T20:08:00-0400
+Main,Subs,Ham and Cheese Sub,10.99,Sub,,8 $10.99,4,2026-09-27T17:26:00-0400
+Main,Subs,Shawarma on Pita,10.99,Sub,,Serving $10.99,4,2026-10-05T23:42:00-0400
+Main,Subs,Turkey and Cheese Wrap,10.99,Sub,,Serving $10.99,4,2026-07-30T18:41:00-0400
+Main,Subs,Ham and Cheese Sandwich,6.99,Sub,,Serving $6.99,3,2026-10-12T10:47:00-0400
+Main,Subs,Steak and Cheese,11.99,Sub,,Serving $11.99,3,2026-07-21T20:01:00-0400
+Main,Subs,Pizza Cheesesteak Sub,10.99,Sub,,8 $10.99,2,2026-06-08T17:39:00-0400
+Main,Subs,Pizza Sub,9.99,Sub,,8 $9.99,2,2026-07-19T11:31:00-0400
+Main,Subs,Tuna Club Sandwich,12.99,Sub,,Serving $12.99,2,2026-08-13T14:48:00-0400
+Main,Subs,Tuna Wrap,10.99,Sub,,Serving $10.99,2,2026-10-08T23:16:00-0400
+Main,Subs,Veggie Sub,13.99,Sub,,12 $13.99 | 8 $10.99,2,2026-05-19T18:48:00-0400
+Main,Subs,Buffalo Cheesesteak Sub,10.99,Sub,,8 $10.99,1,2026-06-23T13:25:00-0400
+Main,Subs,Crispy Chicken on Pita,10.99,Sub,,Serving $10.99,1,2026-08-16T11:38:00-0400
+Main,Subs,Grilled Chicken Club Sandwich,12.99,Sub,,Serving $12.99,1,2026-08-28T22:09:00-0400
+Main,Wings,(8 Piece) Wings,0.00,Wings,,Serving $0.00,756,2026-10-16T00:16:00-0400
+Main,Wings,Jumbo Party Wings,0.00,Wings,,Serving $0.00,713,2026-10-15T22:54:00-0400
+Main,Wings,Jumbo Party Wings Combo,12.99,Wings,,8 Piece $12.99,458,2026-10-16T00:09:00-0400
+Main,Wings,Whole Wings Combo,10.99,Wings,,4 Piece $10.99 | 5 Piece $12.99 | 6 Piece $13.99 | 8 Piece $16.99,222,2026-10-14T20:03:00-0400
+Main,Wings,(10 Piece) Wings,0.00,Wings,,Serving $0.00,173,2026-10-14T19:15:00-0400
+Main,Wings,Chicken Tender,9.99,Wings,,5 Piece $9.99 | 3 Piece $6.99 | 8 Piece $12.99 | 4 Piece $8.99 | 10 Piece $14.99 | 15 Piece $18.99,167,2026-10-15T23:58:00-0400
+Main,Wings,Boneless Party Wings Combo,11.99,Wings,,10 Piece $11.99 | 8 Piece $9.99,91,2026-10-11T20:59:00-0400
+Main,Wings,(20 Piece) Wings,0.00,Wings,,Serving $0.00,90,2026-10-16T00:20:00-0400
+Main,Wings,Chicken Nuggets with French Fries,6.99,Wings,,8 Piece $6.99,83,2026-10-15T17:17:00-0400
+Main,Wings,Chicken Tender/Fries,8.99,Wings,,4 Piece $8.99 | 5 Piece $10.99 | 6 Piece $12.99 | 8 Piece $14.99,74,2026-10-15T19:08:00-0400
+Main,Wings,Corn Nuggets,5.99,Wings,,15 Piece $5.99,62,2026-10-12T17:11:00-0400
+Main,Wings,Boneless Party Wings,0.00,Wings,,Serving $0.00,51,2026-10-14T15:39:00-0400
+Main,Wings,Whole Wings Only,18.99,Wings,,10 Piece $18.99 | 20 Piece $36.99,35,2026-10-13T22:06:00-0400
+Main,Burgers,Cheeseburger,5.99,Sub,,4 oz $5.99 | 6 oz $7.99 | 8 oz $8.99,170,2026-10-15T19:06:00-0400
+Main,Burgers,Double-Decker Cheeseburger,8.99,Sub,,Serving $8.99,65,2026-10-11T18:18:00-0400
+Main,Burgers,Chipotle Black Bean Veggie Burger,6.99,Sub,,Serving $6.99,20,2026-10-12T18:20:00-0400
+Main,Burgers,Turkey Burger,8.99,Sub,,7 oz $8.99,7,2026-10-06T19:50:00-0400
+Main,Burgers,Veggie Burger Original,6.99,Sub,,Serving $6.99,2,2026-09-11T21:14:00-0400
+Main,Desi,Butter Chicken,16.99,Desi,,Serving $16.99,89,2026-10-15T19:08:00-0400
+Main,Desi,Chicken Biryani,16.99,Desi,,Serving $16.99,85,2026-10-15T20:45:00-0400
+Main,Desi,Samosa,3.99,Desi,,2 Piece $3.99,79,2026-10-13T17:21:00-0400
+Main,Desi,Chicken Tikka Masala,16.99,Desi,,Serving $16.99,65,2026-10-15T20:19:00-0400
+Main,Desi,Garlic Naan,3.99,Desi,,Serving $3.99,48,2026-10-13T19:03:00-0400
+Main,Desi,Chicken Tikka Masala Rice Bowl,13.99,Desi,,Serving $13.99,47,2026-10-14T12:50:00-0400
+Main,Desi,Tandoori Chicken,14.99,Desi,,Half $14.99 | Whole $22.99,43,2026-10-12T22:08:00-0400
+Main,Desi,Lamb Gyro on Pita,10.99,Desi,,Serving $10.99,40,2026-10-15T20:38:00-0400
+Main,Desi,Chicken Curry Rice Bowl,12.99,Desi,,Serving $12.99,37,2026-10-11T18:28:00-0400
+Main,Desi,Goat Karahi,18.99,Desi,,Serving $18.99,33,2026-10-15T23:58:00-0400
+Main,Desi,Chicken Tikka Pizza,14.99,Desi,,12 Medium $14.99 | 16 X-Large $20.99 | 14 Large $17.99,29,2026-10-10T00:06:00-0400
+Main,Desi,Lamb Gyro with Fries,13.99,Desi,,Serving $13.99,29,2026-10-04T17:09:00-0400
+Main,Desi,Goat Biryani,18.99,Desi,,Serving $18.99,25,2026-10-14T21:58:00-0400
+Main,Desi,Lamb Biryani,17.99,Desi,,Serving $17.99,24,2026-10-10T18:53:00-0400
+Main,Desi,Chicken Curry,16.99,Desi,,Serving $16.99,22,2026-09-16T21:38:00-0400
+Main,Desi,Lahori Fish Fry,11.99,Desi,,Serving $11.99,22,2026-10-03T17:57:00-0400
+Main,Desi,Butter Naan,3.49,Desi,,Serving $3.49,20,2026-10-05T17:35:00-0400
+Main,Desi,Plain Fresh Baked Naan,3.25,Desi,,Serving $3.25,20,2026-10-12T22:08:00-0400
+Main,Desi,Palak Paneer,15.99,Desi,,Serving $15.99,19,2026-10-12T19:40:00-0400
+Main,Desi,Paneer Masala,15.99,Desi,,Serving $15.99,19,2026-10-09T18:08:00-0400
+Main,Desi,Lamb and Chicken Gyro Combo Over Rice,15.99,Desi,,Serving $15.99,18,2026-10-07T11:27:00-0400
+Main,Desi,Lamb Curry Rice Bowl,13.99,Desi,,Serving $13.99,18,2026-10-15T17:17:00-0400
+Main,Desi,Vegetable Pakora,9.99,Desi,,Serving $9.99,18,2026-10-11T21:48:00-0400
+Main,Desi,Mixed Vegetable Rice Bowl,11.99,Desi,,Serving $11.99,17,2026-10-09T19:35:00-0400
+Main,Desi,Tandoori Chicken Chargha Masala,18.99,Desi,,Half $18.99 | Whole $27.99,17,2026-10-11T12:15:00-0400
+Main,Desi,Chicken Seekh Kebab Masala,16.99,Desi,,Serving $16.99,16,2026-10-10T22:20:00-0400
+Main,Desi,Lamb Curry,17.99,Desi,,Serving $17.99,16,2026-10-08T20:33:00-0400
+Main,Desi,Lamb Tikka Masala,18.99,Desi,,Serving $18.99,16,2026-09-27T12:04:00-0400
+Main,Desi,Aloo Palak,14.99,Desi,,Serving $14.99,15,2026-09-20T21:20:00-0400
+Main,Desi,Chicken Tikka Kebab,14.99,Desi,,Serving $14.99,14,2026-10-14T23:19:00-0400
+Main,Desi,Lamb Tikka Kebab,14.99,Desi,,Serving $14.99,13,2026-09-28T11:49:00-0400
+Main,Desi,Aloo Naan,5.99,Desi,,Serving $5.99,12,2026-10-01T19:29:00-0400
+Main,Desi,Lamb Karahi,18.99,Desi,,Serving $18.99,12,2026-09-12T18:31:00-0400
+Main,Desi,Chana Curry Rice Bowl,11.99,Desi,,Serving $11.99,11,2026-09-09T16:38:00-0400
+Main,Desi,Chicken Karahi,17.99,Desi,,Serving $17.99,11,2026-10-09T18:08:00-0400
+Main,Desi,Chicken Pakora,11.99,Desi,,Serving $11.99,11,2026-09-27T19:08:00-0400
+Main,Desi,Daal Fry,14.99,Desi,,Serving $14.99,10,2026-09-16T11:08:00-0400
+Main,Desi,Daal Makani,14.99,Desi,,Serving $14.99,10,2026-10-04T17:19:00-0400
+Main,Desi,Chicken Tawa Keema,17.99,Desi,,Serving $17.99,9,2026-09-28T10:12:00-0400
+Main,Desi,Chicken Tikka Club Sandwich,12.99,Desi,,Serving $12.99,9,2026-10-04T17:09:00-0400
+Main,Desi,Fish Biryani,17.99,Desi,,Serving $17.99,9,2026-10-10T20:52:00-0400
+Main,Desi,Goat Curry,18.99,Desi,,Serving $18.99,9,2026-10-07T00:10:00-0400
+Main,Desi,Keema Naan,5.99,Desi,,Serving $5.99,9,2026-09-20T21:20:00-0400
+Main,Desi,Lamb Gyro Over Rice,13.99,Desi,,Serving $13.99,9,2026-10-08T18:15:00-0400
+Main,Desi,Lamb Palak,17.99,Desi,,Serving $17.99,8,2026-09-27T14:05:00-0400
+Main,Desi,Chicken Korma,16.99,Desi,,Serving $16.99,7,2026-09-27T12:04:00-0400
+Main,Desi,Fish Shrimp Biryani,19.99,Desi,,Serving $19.99,7,2026-10-15T23:11:00-0400
+Main,Desi,Lamb Korma,18.99,Desi,,Serving $18.99,7,2026-09-29T17:27:00-0400
+Main,Desi,Lamb Seekh Kebab,13.99,Desi,,Serving (2 Piece) $13.99,7,2026-10-01T18:01:00-0400
+Main,Desi,Chicken Gyro Over Rice,13.99,Desi,,Serving $13.99,6,2026-09-01T13:22:00-0400
+Main,Desi,Chicken Seekh Kebab,13.99,Desi,,Serving (2 Piece) $13.99,6,2026-09-26T18:12:00-0400
+Main,Desi,Daal Curry Rice Bowl,11.99,Desi,,Serving $11.99,6,2026-10-14T13:14:00-0400
+Main,Desi,Lamb Chops,20.99,Desi,,Serving (3 Piece) $20.99,6,2026-08-27T10:14:00-0400
+Main,Desi,Lamb Tawa Keema,16.99,Desi,,Serving $16.99,6,2026-10-09T23:18:00-0400
+Main,Desi,Beef Seekh Kebab,13.99,Desi,,Serving (2 Piece) $13.99,5,2026-08-29T21:23:00-0400
+Main,Desi,Bhandi Masala,14.99,Desi,,Serving $14.99,5,2026-10-09T21:03:00-0400
+Main,Desi,Namkeen Chicken Karahi,16.99,Desi,,Serving $16.99,5,2026-10-03T19:48:00-0400
+Main,Desi,Plain Basmati Rice,4.99,Desi,,Serving $4.99,5,2026-08-14T20:31:00-0400
+Main,Desi,Chicken Shawarma Over Rice,13.99,Desi,,Serving $13.99,4,2026-08-20T19:45:00-0400
+Main,Desi,Malai Tikka Kebab,16.99,Desi,,Serving $16.99,4,2026-09-23T22:30:00-0400
+Main,Desi,Mixed Vegetable Curry,14.99,Desi,,Serving $14.99,4,2026-10-15T17:17:00-0400
+Main,Desi,Roghani Naan,3.99,Desi,,Serving $3.99,4,2026-09-25T16:44:00-0400
+Main,Desi,Vegetable Biryani,15.99,Desi,,Serving $15.99,3,2026-08-09T15:47:00-0400
+Main,Desi,Shahi Matter Paneer Masala,14.99,Desi,,Serving $14.99,2,2026-07-22T20:09:00-0400
+Main,Desi,Shrimp Biryani,17.99,Desi,,Serving $17.99,2,2026-07-04T19:10:00-0400
+Main,Desi,Beef Tawa Keema,18.99,Desi,,Serving $18.99,1,2026-06-26T13:58:00-0400
+Main,Desi,Chicken Tikka Combo,15.99,Desi,,Serving $15.99,1,2026-08-25T22:32:00-0400
+Main,Desi,Haryali Tikka Kebab,14.99,Desi,,6 Piece $14.99,1,2026-10-09T14:47:00-0400
+Main,Desi,Lamb Chops Masala,24.99,Desi,,Serving (3 Piece) $24.99,1,2026-05-14T14:16:00-0400
+Main,Desi,Lamb Seekh Kebab Masala,18.99,Desi,,Serving (2 Piece) $18.99,1,2026-07-14T19:31:00-0400
+Main,Pasta,Spaghetti with Chicken Parmesan,13.99,Pizza,,Serving $13.99,38,2026-10-14T19:48:00-0400
+Main,Pasta,Meat Lasagna,11.99,Pizza,,Serving $11.99,29,2026-10-12T11:17:00-0400
+Main,Pasta,Baked Ziti,11.99,Pizza,,Serving $11.99,24,2026-09-28T19:31:00-0400
+Main,Pasta,Chicken Alfredo,14.99,Pizza,,Serving $14.99,23,2026-10-11T22:12:00-0400
+Main,Pasta,Stuffed Shell,11.99,Pizza,,Serving $11.99,17,2026-10-13T19:21:00-0400
+Main,Pasta,Meatball Parmesan Sub,10.99,Pizza,,8 $10.99 | 12 $13.99,16,2026-10-01T06:53:00-0400
+Main,Pasta,Spaghetti with Meat Sauce,13.99,Pizza,,Serving $13.99,12,2026-09-30T17:07:00-0400
+Main,Pasta,Chicken Parmesan Sub,10.99,Pizza,,8 $10.99 | 12 $13.99,11,2026-10-01T20:02:00-0400
+Main,Pasta,Spaghetti with Tomato Sauce,11.99,Pizza,,Serving $11.99,10,2026-10-14T18:13:00-0400
+Main,Pasta,Cheese Ravioli,11.99,Pizza,,Serving $11.99,8,2026-10-10T20:40:00-0400
+Main,Pasta,Chicken Noddle Soup,4.99,Sub,,12 oz $4.99 | 16 oz $6.99,7,2026-09-20T11:37:00-0400
+Main,Pasta,Spaghetti with Meatball,13.99,Pizza,,Serving $13.99,4,2026-09-21T16:04:00-0400
+Main,Pasta,Sausage Parmesan Sub,10.99,Pizza,,8 $10.99,1,2026-06-25T19:32:00-0400
+Main,Pasta,Spaghetti with Sausage,13.99,Pizza,,Serving $13.99,1,2026-07-09T15:45:00-0400
+Main,Seafood,Shrimp Cheesesteak Sub,12.49,Sub,,8 $12.49 | 12 $16.49,68,2026-10-13T19:21:00-0400
+Main,Seafood,Fish Fillet Sandwich,6.99,Sub,,Serving $6.99,38,2026-10-12T22:21:00-0400
+Main,Seafood,Catfish,13.99,Wings,,3 Piece $13.99 | 2 Piece $10.99,36,2026-10-09T16:23:00-0400
+Main,Seafood,Shrimp Chicken Cheesesteak Sub,12.49,Sub,,8 $12.49 | 12 $16.49,34,2026-10-13T22:06:00-0400
+Main,Seafood,Shrimp Basket,11.99,Wings,,21 Piece $11.99,26,2026-10-10T19:52:00-0400
+Main,Seafood,Cheese Fish Sub,10.99,Sub,,8 $10.99 | 12 $13.99,23,2026-10-14T14:26:00-0400
+Main,Seafood,Fried Jumbo Shrimp,11.99,Wings,,8 Piece $11.99,21,2026-10-02T21:29:00-0400
+Main,Seafood,Shrimp Quesadilla,11.99,Sub,,Serving $11.99,19,2026-10-08T18:15:00-0400
+Main,Seafood,Shrimp Salad Sub,11.99,Sub,,8 $11.99 | 12 $15.99,18,2026-10-02T11:12:00-0400
+Main,Seafood,Whiting Fish,8.99,Wings,,2 Piece $8.99 | 3 Piece $10.99,18,2026-09-10T18:07:00-0400
+Main,Seafood,Cheese Fish Sandwich,6.99,Sub,,Serving $6.99,17,2026-10-09T18:18:00-0400
+Main,Seafood,Shrimp Alfredo,14.99,Pizza,,Serving $14.99,17,2026-10-05T17:47:00-0400
+Main,Seafood,Chicken and Shrimp Alfredo,16.99,Pizza,,Serving $16.99,15,2026-09-30T00:05:00-0400
+Main,Seafood,Shrimp Salad Sandwich,7.99,Sub,,Serving $7.99,12,2026-09-14T13:39:00-0400
+Main,Seafood,Shrimp Cheese Steak Pita,11.99,Sub,,Serving $11.99,10,2026-10-07T20:54:00-0400
+Main,Seafood,Shrimp Chowder Soup,5.99,Sub,,16 oz $5.99 | 12 oz $4.99,7,2026-09-30T16:54:00-0400
+Main,Seafood,Shrimp Salad,10.99,Sub,,Large $10.99,7,2026-09-18T20:02:00-0400
+Main,Seafood,Tilapia Fish,10.99,Wings,,2 Piece $10.99,7,2026-09-13T21:23:00-0400
+Main,Seafood,Shrimp Salad on Salad,10.99,Sub,,Large $10.99,4,2026-07-31T00:00:00-0400
+Main,Seafood,Shrimp Salad Wrap,11.99,Sub,,Serving $11.99,4,2026-10-05T13:43:00-0400
+Main,Sides,Small - French Fries,0.00,Wings,,Serving $0.00,1182,2026-10-16T00:16:00-0400
+Main,Sides,French Fries,3.25,Wings,,Small $3.25 | Large $4.49,404,2026-10-15T22:54:00-0400
+Main,Sides,Mozzarella Sticks,5.99,Wings,,6 Piece $5.99,242,2026-10-15T17:48:00-0400
+Main,Sides,(2) Small - French Fries,0.00,Wings,,Serving $0.00,235,2026-10-15T22:40:00-0400
+Main,Sides,Onion Rings,4.99,Wings,,Serving $4.99,106,2026-10-14T23:41:00-0400
+Main,Sides,Chicken Quesadilla,10.99,Sub,,Serving $10.99,105,2026-10-15T15:28:00-0400
+Main,Sides,Old Bay French Fries,3.74,Wings,,Small $3.74 | Large $5.49,57,2026-10-13T20:38:00-0400
+Main,Sides,Cheesy Bread Sticks,7.99,Pizza,,Serving $7.99,48,2026-10-08T18:15:00-0400
+Main,Sides,Curly Fries,4.99,Wings,,Serving $4.99,47,2026-10-15T23:11:00-0400
+Main,Sides,Western Fries,5.99,Wings,,Serving $5.99,46,2026-10-13T21:51:00-0400
+Main,Sides,Popcorn Chicken with French Fries,6.99,Wings,,Serving $6.99,37,2026-10-04T12:32:00-0400
+Main,Sides,Western Fries with Cheese,6.99,Wings,,Serving $6.99,34,2026-10-15T23:57:00-0400
+Main,Sides,Jalapeno Poppers,5.99,Wings,,Serving $5.99,32,2026-10-07T22:30:00-0400
+Main,Sides,Fried Mushrooms,5.99,Wings,,15 Piece $5.99,31,2026-10-01T06:53:00-0400
+Main,Sides,Garlic Bread,2.99,Pizza,,Small $2.99 | Large $3.99,29,2026-10-12T10:47:00-0400
+Main,Sides,Buffalo Chicken Quesadilla,10.99,Sub,,Serving $10.99,25,2026-10-15T18:21:00-0400
+Main,Sides,Meatballs,5.99,Pizza,,4 Piece $5.99,25,2026-10-13T17:29:00-0400
+Main,Sides,Garlic Bread with Cheese,3.99,Pizza,,Small $3.99 | Large $4.99,23,2026-09-29T22:30:00-0400
+Main,Sides,Fries with Cheese,4.99,Wings,,Serving $4.99,20,2026-10-09T23:54:00-0400
+Main,Sides,Krazy Fries,6.99,Wings,,Serving $6.99,18,2026-10-11T13:08:00-0400
+Main,Sides,Fries with Gravy,4.99,Wings,,Serving $4.99,16,2026-10-06T23:11:00-0400
+Main,Sides,Broccoli Cheese Bites,5.99,Wings,,8 Piece $5.99,15,2026-10-15T18:54:00-0400
+Main,Sides,Fries with Cheese Gravy,4.99,Wings,,Serving $4.99,11,2026-09-01T19:32:00-0400
+Main,Sides,Veggie Quesadilla,10.99,Sub,,Serving $10.99,9,2026-10-08T22:39:00-0400
+Main,Sides,Fresh Baked Bread Sticks,3.99,Pizza,,Serving $3.99,8,2026-10-04T21:55:00-0400
+Main,Sides,Broccoli and Chedder Cheese Soup,5.99,Sub,,16 oz $5.99 | 12 oz $4.99,6,2026-10-01T22:16:00-0400
+Main,Sides,Meatball and Cheese,11.99,Pizza,,Serving $11.99,4,2026-09-20T18:48:00-0400
+Main,Sides,Western Fries with Gravy,5.99,Wings,,Serving $5.99,4,2026-10-05T23:42:00-0400
+Main,Sides,New England Clam Chowder Soup,4.99,Sub,,12 oz $4.99 | 16 oz $5.99,2,2026-06-30T23:54:00-0400
+Main,Sides,Chicken Shawarma with Fries,13.99,Wings,,Serving $13.99,1,2026-07-08T18:38:00-0400
+Main,Salads,Garden Salad,6.99,Sub,,Large $6.99 | Small $4.99,92,2026-10-14T14:26:00-0400
+Main,Salads,Fresh Grilled Chicken Garden Salad,10.99,Sub,,Large $10.99,70,2026-10-13T22:03:00-0400
+Main,Salads,Caesar Salad,6.99,Sub,,Large $6.99 | Small $4.99,68,2026-10-15T19:08:00-0400
+Main,Salads,Fresh Grilled Chicken Caesar Salad,10.99,Sub,,Large $10.99,59,2026-10-14T23:12:00-0400
+Main,Salads,Greek Salad,10.99,Sub,,Large $10.99,42,2026-10-09T21:25:00-0400
+Main,Salads,Crispy Chicken Salad,10.99,Sub,,Large $10.99,29,2026-10-15T17:37:00-0400
+Main,Salads,Chef Salad,10.99,Sub,,Large $10.99,20,2026-10-08T17:09:00-0400
+Main,Salads,Organic Mixed Salad,10.99,Sub,,Large $10.99,16,2026-09-24T19:51:00-0400
+Main,Salads,Buffalo Chicken Salad,10.99,Sub,,Large $10.99,11,2026-10-06T11:35:00-0400
+Main,Salads,Organic Spinach Salad,10.99,Sub,,Large $10.99,6,2026-10-01T06:53:00-0400
+Main,Salads,Tuna Salad,10.99,Sub,,Large $10.99,2,2026-10-05T22:13:00-0400
+Main,Drinks,12 oz - Can Soda,0.00,Online,,Serving $0.00,633,2026-10-15T18:21:00-0400
+Main,Drinks,(2) 12 oz - Can Soda,0.00,Online,,Serving $0.00,337,2026-10-15T22:40:00-0400
+Main,Drinks,Fountain Drink,2.75,Online,,Jumbo 44 0z $2.75 | Large 32 oz $2.49 | Medium 20 oz $1.99,292,2026-10-13T13:02:00-0400
+Main,Drinks,2 Liter - Soda,0.00,Online,,Serving $0.00,263,2026-10-16T00:20:00-0400
+Main,Drinks,2 Liter Soda,3.65,Online,,Serving $3.65,263,2026-10-15T22:54:00-0400
+Main,Drinks,20 oz Soda,2.89,Online,,Serving $2.89,208,2026-10-15T23:57:00-0400
+Main,Drinks,12 oz Soda,1.29,Online,,Serving $1.29,206,2026-10-15T13:41:00-0400
+Main,Drinks,Milk Shake,5.99,Pizza,,20 oz $5.99 | 32 oz $6.99,66,2026-10-15T18:28:00-0400
+Main,Drinks,Ever Fresh / Clear Fruit,2.89,Online,,Serving $2.89,9,2026-10-12T10:47:00-0400
+Main,Drinks,10 inch + soda combo,6.99,Pizza,,10 inch combo $6.99,1,2026-05-09T15:42:14-0400
+Main,Drinks,Energy Drinks,3.49,Online,,8.2 oz $3.49,1,2026-10-05T15:24:00-0400
+Main,Desserts,Brownies,4.99,Online,,Serving $4.99,50,2026-10-08T17:17:00-0400
+Main,Desserts,Chocolate Cake,4.49,Online,,Serving $4.49,37,2026-10-12T15:46:00-0400
+Main,Desserts,Oreo Cheesecake,4.49,Online,,Serving $4.49,37,2026-10-05T22:35:00-0400
+Main,Desserts,Ben Jerrys Ice Cream,7.99,Online,,Serving $7.99,26,2026-10-13T21:51:00-0400
+Main,Desserts,New York Cheesecake,3.99,Online,,Serving $3.99,26,2026-09-30T00:05:00-0400
+Main,Desserts,Lemon Cake,3.99,Online,,Serving $3.99,24,2026-10-09T18:07:00-0400
+Main,Desserts,Carrot Cake,4.49,Online,,Serving $4.49,21,2026-10-09T18:07:00-0400
+Main,Desserts,Tiramisu Cake,4.99,Online,,Serving $4.99,21,2026-10-15T23:57:00-0400
+Main,Desserts,Dubai Chocolate Cake,4.99,Online,,Serving $4.99,18,2026-10-05T22:35:00-0400
+Main,Desserts,Banana Pudding,3.49,Online,,Serving $3.49,13,2026-10-12T17:11:00-0400
+Main,Desserts,Biscoff Cake,5.99,Online,,Serving $5.99,12,2026-07-01T21:05:00-0400
+Main,Desserts,Nutella Cheese Cake,4.99,Online,,Serving $4.99,11,2026-10-11T20:59:00-0400
+Main,Desserts,Rice Pudding,3.99,Online,,Serving $3.99,10,2026-09-26T20:44:00-0400
+Main,Desserts,Buddys Rainbow Cake,6.99,Online,,Serving $6.99,9,2026-09-13T17:12:00-0400
+Main,Desserts,Ube Cake,5.99,Online,,Serving $5.99,4,2026-05-29T20:19:00-0400
+Main,Desserts,Banan Puding Cake,5.99,Online,,Serving $5.99,3,2026-05-09T14:11:00-0400
+Main,Desserts,Red Valvet Brownies,4.49,Online,,Serving $4.49,3,2026-05-01T23:20:00-0400
+Main,Desserts,Rainbow Cake,6.99,Online,,Serving $6.99,1,2026-09-30T17:45:00-0400
+Main,Other,Ground Beef Cheese,11.99,Pizza,,Serving $11.99,7,2026-10-11T17:55:00-0400
+Main,Desi,Tandori Roti,2.99,Desi,,Serving $2.99,7,2026-09-22T21:48:00-0400
+Main,Other,Plain Cheese,9.99,Pizza,,Serving $9.99,5,2026-10-10T16:11:00-0400
+Main,Other,Build Your Own,13.99,Pizza,,Serving $13.99,3,2026-06-07T18:21:00-0400
+Main,Other,Ham and Cheese,11.99,Pizza,,Serving $11.99,1,2026-05-23T20:06:00-0400
+Main,Other,Sausage and Cheese,11.99,Pizza,,Serving $11.99,1,2026-05-17T21:00:00-0400
+Main,Other,Spinach and Cheese,11.99,Pizza,,Serving $11.99,1,2026-08-17T15:08:00-0400
