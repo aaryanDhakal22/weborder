@@ -1,0 +1,92 @@
+{
+	"Barlow": [
+		{
+			"weight": "400",
+			"file": "barlow-400.woff2"
+		},
+		{
+			"weight": "500",
+			"file": "barlow-500.woff2"
+		},
+		{
+			"weight": "600",
+			"file": "barlow-600.woff2"
+		},
+		{
+			"weight": "700",
+			"file": "barlow-700.woff2"
+		},
+		{
+			"weight": "800",
+			"file": "barlow-800.woff2"
+		}
+	],
+	"Barlow Condensed": [
+		{
+			"weight": "600",
+			"file": "barlow-condensed-600.woff2"
+		},
+		{
+			"weight": "700",
+			"file": "barlow-condensed-700.woff2"
+		},
+		{
+			"weight": "800",
+			"file": "barlow-condensed-800.woff2"
+		}
+	],
+	"Barlow Semi Condensed": [
+		{
+			"weight": "500",
+			"file": "barlow-semi-condensed-500.woff2"
+		},
+		{
+			"weight": "600",
+			"file": "barlow-semi-condensed-600.woff2"
+		},
+		{
+			"weight": "700",
+			"file": "barlow-semi-condensed-700.woff2"
+		},
+		{
+			"weight": "800",
+			"file": "barlow-semi-condensed-800.woff2"
+		}
+	],
+	"Young Serif": [
+		{
+			"weight": "400",
+			"file": "young-serif-400.woff2"
+		}
+	],
+	"Instrument Sans": [
+		{
+			"weight": "400 700",
+			"file": "instrument-sans-var.woff2"
+		}
+	],
+	"Bowlby One": [
+		{
+			"weight": "400",
+			"file": "bowlby-one-400.woff2"
+		}
+	],
+	"Rubik": [
+		{
+			"weight": "400 800",
+			"file": "rubik-var.woff2"
+		}
+	],
+	"Inter": [
+		{
+			"weight": "400 700",
+			"file": "inter-var.woff2"
+		}
+	],
+	"JetBrains Mono": [
+		{
+			"weight": "500 800",
+			"file": "jetbrains-mono-var.woff2"
+		}
+	]
+}

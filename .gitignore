@@ -1,2 +1,11 @@
+node_modules/
+build/
+.svelte-kit/
+data/
+reports/
+export/
+.env
+*.log
 CLAUDE.md
 claude.md
+.claude/
