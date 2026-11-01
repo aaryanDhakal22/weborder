@@ -5,7 +5,7 @@
 	const path = $derived(page.url.pathname);
 </script>
 
-<svelte:head><title>quicc stores</title><meta name="robots" content="noindex" /></svelte:head>
+<svelte:head><title>quicc stores</title><meta name="robots" content="noindex" /><meta name="color-scheme" content="light dark" /></svelte:head>
 
 {#if !data.admin}
 	{@render children()}

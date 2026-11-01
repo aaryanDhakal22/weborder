@@ -7,7 +7,7 @@
   --brand: #ac94f4; --brand-hover: #bba7f7; --on-brand: #241b47; --brand-soft: #f1ecfe;
   --ok: #15803d; --ok-bg: #dcfce7; --warn: #b45309; --warn-bg: #fef3c7; --bad: #b91c1c; --bad-bg: #fee2e2;
   --info: #1d4ed8; --info-bg: #dbeafe; --shadow: 0 1px 2px rgba(26, 21, 48, 0.05); --scrim: rgba(15, 13, 26, 0.45);
-  color-scheme: light;
+  color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -36,7 +36,6 @@ html, body { margin: 0; background: var(--canvas); color: var(--text); }
 .adm .okbox { padding: 10px 14px; border-radius: 10px; background: var(--ok-bg); color: var(--ok); font-weight: 500; }
 .adm label.check-row { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .adm input[type=checkbox], .adm input[type=radio] { width: 18px; height: 18px; accent-color: #ac94f4; }
-@media (max-width: 860px) { .adm { flex-direction: column; } .adm .aside { width: auto; border-right: 0; border-bottom: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; align-items: center; } .adm .aside .foot { margin: 0 0 0 auto; flex-direction: row; } .adm .navgrp { flex-direction: row; flex-wrap: wrap; } .adm .mainc { padding: 20px 16px 40px; } .adm .grid2, .adm .grid3 { grid-template-columns: 1fr; } }
 
 .adm * { box-sizing: border-box; }
 .adm h1, .adm h2, .adm h3, .adm p { margin: 0; }
@@ -191,3 +190,6 @@ html, body { margin: 0; background: var(--canvas); color: var(--text); }
 .adm .banner { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); font-size: 13px; font-weight: 500; }
 .adm .banner .grow { flex: 1; color: var(--text); }
 
+
+/* phone: last so it wins over the shell rules above */
+@media (max-width: 860px) { .adm { flex-direction: column; } .adm .aside { width: auto; gap: 8px 12px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; align-items: center; } .adm .aside .foot { margin: 0 0 0 auto; flex-direction: row; } .adm .navgrp { flex-direction: row; flex-wrap: wrap; } .adm .mainc { padding: 20px 16px 40px; } .adm .brand span { display: none; } .adm .grid2, .adm .grid3 { grid-template-columns: 1fr; } }
