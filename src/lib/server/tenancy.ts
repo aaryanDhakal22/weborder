@@ -6,7 +6,8 @@ import { source } from './source';
 export type HostKind = { kind: 'admin' } | { kind: 'store'; store: Store } | { kind: 'unknown' };
 
 export function cleanHost(raw: string | null): string {
-	return (raw ?? '').split(',')[0].trim().toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+	const h = (raw ?? '').split(',')[0].trim().toLowerCase();
+	return (cfg.hostAliases.get(h) ?? h).replace(/:\d+$/, '').replace(/\.$/, '');
 }
 
 export async function resolveHost(host: string): Promise<HostKind> {
@@ -16,6 +17,11 @@ export async function resolveHost(host: string): Promise<HostKind> {
 	if (host.endsWith(suffix) && RESERVED.has(host.slice(0, -suffix.length))) return { kind: 'unknown' };
 	const store = await source.storeByHost(host);
 	return store ? { kind: 'store', store } : { kind: 'unknown' };
+}
+
+/** The HOST_ALIASES entry ("name:port") that serves this host, if any. */
+export function aliasOf(host: string): string | undefined {
+	for (const [alias, target] of cfg.hostAliases) if (target === host) return alias;
 }
 
 /** The canonical host: the first verified custom domain, else <slug>.<baseDomain>. */

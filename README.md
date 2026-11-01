@@ -79,6 +79,7 @@ WCAG-checked palette) is generated from that.
 | `DEMO_FLOOR` | `fast` | `real` makes the simulated order stages take minutes |
 | `PORT` | `3000` | Production port (the publisher renders pages by calling it) |
 | `RENDER_ORIGIN` | | Override where the publisher sends render requests |
+| `HOST_ALIASES` | | Dev/demo only: `name:8444=fern.localhost,…` serves each store on its own port of one machine name (e.g. behind `tailscale serve`) |
 
 ## Layout
 

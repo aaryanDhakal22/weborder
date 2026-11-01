@@ -21,7 +21,14 @@ export const cfg = {
 	/** Order tracking stages advance in seconds ('fast', for demos) or minutes ('real'). */
 	floor: (env.DEMO_FLOOR || 'fast') as 'fast' | 'real',
 	/** Publisher renders pages by calling this server; defaults to the request's own port. */
-	renderOrigin: env.RENDER_ORIGIN || ''
+	renderOrigin: env.RENDER_ORIGIN || '',
+	/** Dev/demo only: "host:port=store-host,…" lets one machine name serve each store on its own port. */
+	hostAliases: new Map(
+		(env.HOST_ALIASES || '')
+			.split(',')
+			.map((p) => p.trim().toLowerCase().split('='))
+			.filter((p) => p.length === 2 && p[0] && p[1]) as [string, string][]
+	)
 };
 
 export const RESERVED = new Set(['www', 'main', 'staging', 'staging-main', 'ingest', 'utility', 'otlp', 'metrics', 'callcenter', 'order', 'api', 'app', 'admin', 'content', 'stores', 'mail']);

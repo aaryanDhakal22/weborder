@@ -3,7 +3,7 @@ import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import type { Store } from '$lib/types';
 import { cfg } from './config';
-import { primaryHost } from './tenancy';
+import { aliasOf, primaryHost } from './tenancy';
 
 export function renderTarget(url: URL): { port: number; hostPort: string } {
 	if (cfg.renderOrigin) {
@@ -15,6 +15,9 @@ export function renderTarget(url: URL): { port: number; hostPort: string } {
 }
 
 export function storeUrl(store: Store, url: URL): string {
+	// Admin opened through an alias (e.g. tailscale serve, which terminates TLS): link the store's alias too.
+	const alias = cfg.hostAliases.has(url.host) ? aliasOf(`${store.slug}.${cfg.baseDomain}`) : undefined;
+	if (alias) return `https://${alias}`;
 	if (dev) return `http://${store.slug}.${cfg.baseDomain}:${url.port || 5173}`;
 	return `https://${primaryHost(store)}`;
 }

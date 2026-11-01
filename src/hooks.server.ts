@@ -5,9 +5,11 @@ import { dev } from '$app/environment';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { cfg } from '$lib/server/config';
-import { cleanHost, resolveHost } from '$lib/server/tenancy';
+import { aliasOf, cleanHost, resolveHost } from '$lib/server/tenancy';
 import { isAdmin, isRender, readToken, RENDER_HEADER } from '$lib/server/auth';
 import { snapshotFile } from '$lib/server/publish';
+
+const adminAlias = aliasOf(cfg.adminHost);
 
 const NOT_FOUND = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Not found</title>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f0d1a;color:#f4f1fb;font:16px/1.5 system-ui,sans-serif;text-align:center;padding:24px}
@@ -74,7 +76,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		res.headers.set('x-content-type-options', 'nosniff');
 		res.headers.set('referrer-policy', 'strict-origin-when-cross-origin');
 		// The admin's live preview frames store pages; nobody else may.
-		res.headers.set('content-security-policy', `frame-ancestors 'self' http://${cfg.adminHost}:* https://${cfg.adminHost}`);
+		res.headers.set('content-security-policy', `frame-ancestors 'self' http://${cfg.adminHost}:* https://${cfg.adminHost}${adminAlias ? ` https://${adminAlias}` : ''}`);
 		res.headers.set('cache-tag', `site-${store.id}`);
 		return res;
 	};
