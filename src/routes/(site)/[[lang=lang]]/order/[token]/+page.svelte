@@ -3,7 +3,15 @@
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/state';
 	import Icon from '$lib/components/Icon.svelte';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import placedArt from '$lib/miso/art/miso-placed.svg?raw';
+	import receivedArt from '$lib/miso/art/miso-received.svg?raw';
+	import cookingArt from '$lib/miso/art/miso-cooking.svg?raw';
+	import readyArt from '$lib/miso/art/miso-ready.svg?raw';
+	import outArt from '$lib/miso/art/miso-out.svg?raw';
+	import doneArt from '$lib/miso/art/miso-done.svg?raw';
+	import lostArt from '$lib/miso/art/miso-lost.svg?raw';
+	import waveArt from '$lib/miso/art/miso-wave.svg?raw';
 	import { t } from '$lib/i18n';
 	import { clock } from '$lib/fmt';
 	import type { OrderStatus, Track } from '$lib/types';
@@ -14,8 +22,11 @@
 	const T = (k: Parameters<typeof t>[1], v?: Record<string, string | number>) => t(L, k, v);
 	let o = $state<Track>(untrack(() => data.track));
 	let standalone = $state(true);
+	// straight from Place order: Miso celebrates for a moment before the steps take over
+	let fresh = $state(untrack(() => !!page.state.placed));
 
 	onMount(() => {
+		if (fresh) setTimeout(() => (fresh = false), 4200);
 		standalone = matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 		if (o.status === 'completed' || o.status === 'cancelled') return;
 		const es = new EventSource(`/api/track/${encodeURIComponent(data.token)}/events`);
@@ -33,7 +44,16 @@
 	const now = $derived(o.status === 'cancelled' ? -1 : Math.max(rank(o.status), 0));
 	const at = (s: OrderStatus) => o.steps.findLast((x) => x.status === s)?.at ?? null;
 	const due = $derived(o.status === 'scheduled' || (o.promised_at && !o.estimated_ready_at) ? o.promised_at : o.estimated_ready_at);
-	const pose = $derived(o.status === 'cancelled' ? 'lost' : o.status === 'completed' ? 'happy' : o.status === 'on_delivery' ? 'scooter' : o.status === 'ready' ? 'wave' : o.status === 'accepted' ? 'dough' : 'ticket');
+	// the tracking steps always show Miso
+	const art = $derived(
+		fresh && (o.status === 'received' || o.status === 'scheduled') ? placedArt
+		: o.status === 'cancelled' ? lostArt
+		: o.status === 'completed' ? doneArt
+		: o.status === 'on_delivery' ? outArt
+		: o.status === 'ready' ? readyArt
+		: o.status === 'accepted' ? cookingArt
+		: receivedArt
+	);
 	const label = (s: OrderStatus): string => {
 		switch (s) {
 			case 'scheduled': return T('scheduled');
@@ -67,7 +87,7 @@
 <div class="pad track-grid">
 	<div class="col">
 		<div class="track-hero card">
-			{#if S.look.mascot === 'miso'}<Mascot {pose} size={150} />{/if}
+			<Miso {art} size={150} decorative />
 			<div class="kitchen-no"><small>{T('orderNo')}</small>{o.kitchen_number ? `#${o.kitchen_number}` : '—'}</div>
 			{#if o.status === 'cancelled'}<div class="eta">{T('cancelledSub')}</div>
 			{:else if o.status === 'completed'}<div class="eta"><b>{deliv ? T('done') : T('doneP')}</b></div>
@@ -109,7 +129,7 @@
 				<li class="slot"><span class="n">1</span><span class="txt"><span class="l1">{T('share')}</span><span class="l2">{T('shareSub')}</span></span><Icon name="share" size={24} /></li>
 				<li class="slot"><span class="n">2</span><span class="txt"><span class="l1">{T('addHome')}</span><span class="l2">{T('addHomeSub')}</span></span><Icon name="addsq" size={24} /></li>
 			</ol>
-			<div class="android">{#if S.look.mascot === 'miso'}<Mascot pose="wave" size={84} />{/if}<p class="t2">{T('androidNote')}</p></div>
+			<div class="android">{#if S.look.miso.pages}<Miso art={waveArt} size={84} decorative />{/if}<p class="t2">{T('androidNote')}</p></div>
 		</div>
 		<div class="sheet-foot"><button type="button" class="btn btn-p btn-lg grow" onclick={() => history.back()}>{T('gotIt')}</button></div>
 	</div>

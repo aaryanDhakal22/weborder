@@ -1,7 +1,8 @@
 <script lang="ts">
 	import DealCard from '$lib/components/DealCard.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import noDealsArt from '$lib/miso/art/miso-no-deals.svg?raw';
 	import { t } from '$lib/i18n';
 	import { live } from '$lib/engine';
 
@@ -41,7 +42,7 @@
 	<div class="pad foot-note"><div class="banner info"><Icon name="tag" size={20} /><span class="grow">{t(L, 'haveCode')}</span></div></div>
 {:else}
 	<div class="state">
-		{#if S.look.mascot === 'miso'}<Mascot pose="dough" size={170} />{/if}
+		{#if S.look.miso.pages}<Miso art={noDealsArt} size={170} decorative />{/if}
 		<h2>{t(L, 'noDeals')}</h2>
 		<p>{t(L, 'noDealsSub')}</p>
 		<a class="btn btn-p btn-lg" href="{b}/menu">{t(L, 'seeMenu')}</a>

@@ -3,7 +3,10 @@
 	import { page } from '$app/state';
 	import { onDestroy } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import waveArt from '$lib/miso/art/miso-wave.svg?raw';
+	import loadingArt from '$lib/miso/art/miso-loading.svg?raw';
+	import noOrdersArt from '$lib/miso/art/miso-no-orders.svg?raw';
 	import { account, api } from '$lib/account.svelte';
 	import { cart } from '$lib/cart.svelte';
 	import { t } from '$lib/i18n';
@@ -171,10 +174,10 @@
 <div class="pad wrap">
 	{#if err}<div class="banner warn" role="alert"><Icon name="info" size={18} /><span class="grow">{err}</span></div>{/if}
 	{#if !account.loaded}
-		<p class="muted">…</p>
+		<div class="loading"><Miso art={loadingArt} size={72} label={T('loading')} /></div>
 	{:else if !me}
 		<section class="card sec signin">
-			{#if S.look.mascot === 'miso'}<div class="miso"><Mascot pose="wave" size={110} /></div>{/if}
+			{#if S.look.miso.pages}<div class="miso"><Miso art={waveArt} size={110} decorative /></div>{/if}
 			<p class="t2">{T('signInWhy')}</p>
 			{#if step === 'phone'}
 				<form onsubmit={(e) => { e.preventDefault(); send(); }}>
@@ -213,7 +216,7 @@
 		<section class="card sec">
 			<div class="sec-h"><h2>{T('pastOrders')}</h2></div>
 			{#if orders === null}<p class="muted">…</p>
-			{:else if !orders.length}<p class="muted">{T('noOrders')}</p>
+			{:else if !orders.length}<div class="none">{#if S.look.miso.pages}<Miso art={noOrdersArt} size={90} decorative />{/if}<p class="muted">{T('noOrders')}</p></div>
 			{:else}
 				<ul class="orders">
 					{#each orders.slice(0, 20) as o (o.id)}
@@ -284,6 +287,8 @@
 	.signin { position: relative; }
 	.signin form { display: flex; flex-direction: column; gap: 12px; }
 	.miso { align-self: center; }
+	.loading { display: flex; justify-content: center; padding: 40px 0; }
+	.none { display: flex; align-items: center; gap: 14px; }
 	.field { display: flex; flex-direction: column; gap: 4px; min-height: 0; padding: 0; border: 0; background: none; }
 	.field > span { font-size: 12px; color: var(--q-muted); font-weight: 600; }
 	.field input { min-height: 50px; padding: 8px 14px; border-radius: var(--q-r-md); border: var(--q-border-w) solid var(--q-border-strong); background: var(--q-field-bg); font-size: 16px; }

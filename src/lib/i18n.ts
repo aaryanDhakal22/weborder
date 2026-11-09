@@ -27,7 +27,7 @@ const en = {
 	subtotal: 'Subtotal', tax: 'Tax', tip: 'Tip', deliveryFee: 'Delivery fee', serviceFee: 'Service fee', cardFee: 'Card fee ({p}%)', total: 'Total', savedYou: 'Deals saved you {m}', promo: 'Promo code',
 	emptyCart: 'Your order is empty', emptyCartSub: 'Nothing in it yet. Start with the menu.', browse: 'Browse the menu',
 	// checkout
-	haveAccount: 'Have an account? Sign in for your saved addresses and cards.', when: 'When', day: 'Day', chooseTime: 'Choose a time', loadingTimes: 'Finding times…',
+	haveAccount: 'Have an account? Sign in for your saved addresses and cards.', when: 'When', day: 'Day', chooseTime: 'Choose a time', loadingTimes: 'Finding times…', loading: 'Loading…',
 	noTimes: 'No times left that day. Try another day.', notOpenYet: "We're closed right now. Schedule it for when we open.", pausedSchedule: 'Online orders are paused. You can schedule for later.',
 	details: 'Your details', name: 'Name', phone: 'Phone (we call if something is wrong)', phoneShort: 'Phone', email: 'Email, for the receipt (optional)',
 	orderNotes: 'Notes for the order', orderNotesPh: 'Anything we should know?',
@@ -85,7 +85,7 @@ const es: Dict = {
 	yourOrder: 'Tu pedido', viewOrder: 'Ver pedido', checkout: 'Pagar', goCheckout: 'Ir a pagar', goesWith: 'Va bien con',
 	subtotal: 'Subtotal', tax: 'Impuesto', tip: 'Propina', deliveryFee: 'Envío', serviceFee: 'Cargo de servicio', cardFee: 'Cargo por tarjeta ({p}%)', total: 'Total', savedYou: 'Ahorraste {m}', promo: 'Código',
 	emptyCart: 'Tu pedido está vacío', emptyCartSub: 'Aún no hay nada. Empieza por el menú.', browse: 'Ver el menú',
-	haveAccount: '¿Tienes cuenta? Entra para usar tus direcciones y tarjetas.', when: 'Cuándo', day: 'Día', chooseTime: 'Elige una hora', loadingTimes: 'Buscando horas…',
+	haveAccount: '¿Tienes cuenta? Entra para usar tus direcciones y tarjetas.', when: 'Cuándo', day: 'Día', chooseTime: 'Elige una hora', loadingTimes: 'Buscando horas…', loading: 'Cargando…',
 	noTimes: 'No quedan horas ese día. Prueba otro día.', notOpenYet: 'Ahora estamos cerrados. Prográmalo para cuando abramos.', pausedSchedule: 'Los pedidos en línea están en pausa. Puedes programar para después.',
 	details: 'Tus datos', name: 'Nombre', phone: 'Teléfono (te llamamos si algo pasa)', phoneShort: 'Teléfono', email: 'Correo, para el recibo (opcional)',
 	orderNotes: 'Notas del pedido', orderNotesPh: '¿Algo que debamos saber?',

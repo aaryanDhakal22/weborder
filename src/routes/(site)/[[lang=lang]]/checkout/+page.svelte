@@ -2,7 +2,14 @@
 	import { goto } from '$app/navigation';
 	import { onDestroy, untrack } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import emptyArt from '$lib/miso/art/miso-empty-cart.svg?raw';
+	import declinedArt from '$lib/miso/art/miso-declined.svg?raw';
+	import outsideArt from '$lib/miso/art/miso-outside.svg?raw';
+	import pausedArt from '$lib/miso/art/miso-paused.svg?raw';
+	import closedArt from '$lib/miso/art/miso-closed.svg?raw';
+	import lostArt from '$lib/miso/art/miso-lost.svg?raw';
+	import loadingArt from '$lib/miso/art/miso-loading.svg?raw';
 	import { cart } from '$lib/cart.svelte';
 	import { account } from '$lib/account.svelte';
 	import { t } from '$lib/i18n';
@@ -242,7 +249,7 @@
 			if (r.ok) {
 				const o = res as PlacedOrder;
 				cart.clear();
-				await goto(`${b}/order/${o.track_token}`, { replaceState: true });
+				await goto(`${b}/order/${o.track_token}`, { replaceState: true, state: { placed: true } });
 				return;
 			}
 			failure = { code: res.code ?? 'error', message: res.issues?.map((i: { message: string }) => i.message).join(' ') || res.error || T('tryAgain') };
@@ -257,7 +264,8 @@
 	const failTitle = $derived(
 		!failure ? '' : failure.code === 'payment_declined' ? T('payFail') : failure.code === 'outside_area' ? T('zoneTitle') : failure.code === 'store_closed' ? T('closedTitle') : failure.code === 'store_paused' ? T('pausedTitle') : failure.code === 'price_changed' ? T('priceChanged') : T('checkThis')
 	);
-	const pose = $derived(failure?.code === 'payment_declined' ? 'card' : failure?.code === 'outside_area' ? 'map' : failure?.code === 'store_paused' ? 'paused' : failure?.code === 'store_closed' ? 'sleep' : 'idle');
+	// errors always show Miso
+	const failArt = $derived(failure?.code === 'payment_declined' ? declinedArt : failure?.code === 'outside_area' ? outsideArt : failure?.code === 'store_paused' ? pausedArt : failure?.code === 'store_closed' ? closedArt : lostArt);
 </script>
 
 <svelte:head>
@@ -271,13 +279,13 @@
 </div>
 
 {#if cart.ready && !cart.entries.length}
-	<div class="state">{#if S.look.mascot === 'miso'}<Mascot pose="bowl" size={160} />{/if}<h2>{T('emptyCart')}</h2><p>{T('emptyCartSub')}</p><a class="btn btn-p btn-lg" href="{b}/menu">{T('browse')}</a></div>
+	<div class="state">{#if S.look.miso.pages}<Miso art={emptyArt} size={160} decorative />{/if}<h2>{T('emptyCart')}</h2><p>{T('emptyCartSub')}</p><a class="btn btn-p btn-lg" href="{b}/menu">{T('browse')}</a></div>
 {:else}
 	<form class="pad co-grid" onsubmit={place} novalidate>
 		<div class="col">
 			{#if failure}
 				<div id="failure" class="card fail" role="alert">
-					{#if S.look.mascot === 'miso'}<Mascot {pose} size={96} />{/if}
+					<Miso art={failArt} size={96} decorative />
 					<div><b>{failTitle}</b><p>{failure.message}</p>
 						{#if failure.code === 'outside_area' && types.pickup.enabled}<button type="button" class="btn btn-sm" onclick={() => { cart.setFulfil('pickup'); failure = null; }}>{T('switchPickup')}</button>{/if}
 						{#if failure.code === 'payment_declined' && methods.includes('cash')}<button type="button" class="btn btn-sm" onclick={() => { pay = 'cash'; failure = null; }}>{deliv ? T('cashDriver') : T('cashPickup')}</button>{/if}
@@ -339,7 +347,7 @@
 					<div class="daychips" role="radiogroup" aria-label={T('day')}>
 						{#each days as d, i (d.date)}<button type="button" role="radio" aria-checked={(day || days[0].date) === d.date} class="chip" class:on={(day || days[0].date) === d.date} onclick={() => (day = d.date)}>{d.label}</button>{/each}
 					</div>
-					{#if times === null}<p class="muted small">{T('loadingTimes')}</p>
+					{#if times === null}<p class="muted small loading-times"><Miso art={loadingArt} size={48} decorative />{T('loadingTimes')}</p>
 					{:else if !times.length}<p class="muted small">{T('noTimes')}</p>
 					{:else}
 						<label class="field"><span>{T('chooseTime')}</span><select bind:value={slot}>{#each times as x (x)}<option value={x}>{clock(x, S.timezone)}</option>{/each}</select></label>
@@ -479,6 +487,7 @@
 	.small { font-size: 13px; }
 	.err { color: var(--q-bad); }
 	.center { text-align: center; }
+	.loading-times { display: flex; align-items: center; gap: 10px; }
 	.fail { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-color: var(--q-bad); }
 	.fail p { color: var(--q-text2); font-size: 14px; margin: 2px 0 8px; }
 	.placebar.only-m { display: block; }

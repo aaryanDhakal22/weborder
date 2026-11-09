@@ -15,6 +15,8 @@ declare global {
 		interface PageState {
 			sheet?: string;
 			install?: boolean;
+			/** the tracking page right after Place order (Miso's celebration) */
+			placed?: boolean;
 		}
 		interface Error {
 			message: string;

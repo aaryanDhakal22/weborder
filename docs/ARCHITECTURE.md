@@ -64,6 +64,28 @@ one brand colour into ~35 tokens (OKLCH, with a WCAG AA contrast guard). The loo
 Website's published settings (`/channel/v1/site`), over the default: theme zero (Quibase, Barlow)
 in Lombardi's red (`src/lib/look.ts`).
 
+## Miso (`src/lib/miso/`)
+
+The cat chef is the illustrator's 19 animated SVGs (`src/lib/miso/art/`, kept byte for byte; the
+brief is `docs/MISO-BRIEF.md`, their notes and generator are in `docs/miso/`). A page imports only its
+own scenes (`import peek from '$lib/miso/art/miso-peek.svg?raw'`) and renders `<Miso art={peek} />`.
+`prepare()` makes a scene page-ready:
+- the store colour (`#E2363B` → `--miso-brand`) and the whisker ink (`--miso-ink`);
+- one sticker edge round the drawing, which skips lines as thin as the whiskers;
+- ids per instance;
+- every animation hung off one starter. The component fires it only when the visitor allows
+  motion, so no JS and reduced motion both get the still pose.
+
+Where Miso shows:
+- **always:** the tracking steps (+ "placed" for 4 s after Place order), closed / paused on
+  home, checkout errors, loading, and the error page;
+- **optional:**
+  - `miso_pages` (cart, checkout, sign-in, empty deals / orders, the bundle celebration);
+  - `miso_blocks` (per home block: `peek` / `side` / `off`; default: the hero peeking).
+
+Replacing the art means dropping new files into `art/` (same names); `test/unit/miso.test.ts`
+checks every scene still prepares.
+
 ## PWA
 
 Each host serves its own `manifest.webmanifest` and `icon.svg` (the store's initial on its

@@ -112,11 +112,19 @@ export interface Me {
 
 // ------------------------------------------------------------------ the look (Store › Website, later)
 
+export type MisoSpot = 'peek' | 'side' | 'off';
+
 /** The store's website look: Store › Website's published settings over the defaults. */
 export interface Look {
 	preset: string;
 	brand: string;
-	mascot: 'miso' | 'off';
+	/** Miso's optional places (the status/process scenes always show): */
+	miso: {
+		/** cart, checkout, sign-in and the empty pages (no deals, no orders) */
+		pages: boolean;
+		/** per Home page block: Miso peeking over it, sitting beside it, or none */
+		blocks: Record<string, MisoSpot>;
+	};
 	languages: Lang[];
 	texts: { eyebrow?: string; headline?: string; lead?: string; tagline?: string };
 }

@@ -3,7 +3,11 @@
 	import DealCard from '$lib/components/DealCard.svelte';
 	import ItemTile from '$lib/components/ItemTile.svelte';
 	import HoursCard from '$lib/components/HoursCard.svelte';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import peekArt from '$lib/miso/art/miso-peek.svg?raw';
+	import sideArt from '$lib/miso/art/miso-side.svg?raw';
+	import closedArt from '$lib/miso/art/miso-closed.svg?raw';
+	import pausedArt from '$lib/miso/art/miso-paused.svg?raw';
 	import { cart } from '$lib/cart.svelte';
 	import { t } from '$lib/i18n';
 	import { money } from '$lib/fmt';
@@ -23,6 +27,9 @@
 	const photoTiles = $derived(data.theme.layout.menu === 'photo');
 	const desc = $derived(`${data.copy.tagline} ${delivery?.enabled ? (L === 'es' ? 'Pide en línea para entrega o para llevar.' : 'Order online for delivery or pickup.') : L === 'es' ? 'Pide en línea para recoger.' : 'Order online for pickup.'}`);
 	const now = new Date();
+	// closed / paused: Miso asleep or snowed under, always; otherwise the hero block's own cat (optional)
+	const away = $derived(st?.state === 'closed' || st?.state === 'paused' ? st.state : null);
+	const heroSpot = $derived(away ? 'off' : (S.look.miso.blocks.hero ?? 'off'));
 </script>
 
 <svelte:head>
@@ -45,6 +52,7 @@
 			<a class="btn btn-p btn-lg" href="{b}/menu">{st?.state === 'open' ? T('startOrder') : T('orderAhead')} <Icon name="right" size={20} stroke={2.5} /></a>
 			{#if deals.length}<a class="btn btn-lg" href="{b}/deals"><Icon name="tag" size={18} /> {T('seeDeals')}</a>{/if}
 		</div>
+		{#if away}<Miso art={away === 'closed' ? closedArt : pausedArt} size={130} decorative />{/if}
 		<div class="status-line">
 			{#if st?.state === 'open'}<span class="open">{T('openNow')}</span>{:else if st?.state === 'paused'}<span class="closed">{T('pausedBar')}</span>{:else}<span class="closed">{T('closed')}</span>{/if}
 			{#if delivery?.enabled}<span class="num">{T('delivery')} ~{delivery.eta_minutes} {T('minutes')}</span>{/if}
@@ -53,7 +61,8 @@
 	</div>
 	<div class="hide-m hero-card">
 		<div class="card">
-			{#if S.look.mascot === 'miso'}<div class="miso"><Mascot pose="wave" size={120} /></div>{/if}
+			{#if heroSpot === 'peek'}<div class="miso peek"><Miso art={peekArt} size={96} decorative /></div>
+			{:else if heroSpot === 'side'}<div class="miso side"><Miso art={sideArt} size={96} decorative /></div>{/if}
 			<span class="eyebrow">{T('howWant')}</span>
 			<div class="seg full" role="radiogroup">
 				{#if delivery?.enabled}<button type="button" role="radio" aria-checked={cart.fulfil === 'delivery'} class:on={cart.fulfil === 'delivery'} onclick={() => cart.setFulfil('delivery')}><Icon name="scooter" size={16} />{T('delivery')}</button>{/if}
@@ -100,7 +109,11 @@
 	.hero-copy { display: flex; flex-direction: column; gap: 18px; position: relative; }
 	.hero-card { position: relative; flex-direction: column; }
 	.hero-card .card { padding: 22px; display: flex; flex-direction: column; gap: 14px; position: relative; }
-	.miso { position: absolute; right: 12px; top: -84px; pointer-events: none; }
+	.miso { position: absolute; pointer-events: none; }
+	/* the peek's paws sit on the card's top edge (y 144 of 150); the side-sit's feet on its bottom (y 198 of 232) */
+	.miso.peek { right: 18px; top: -84px; }
+	.hero-card:has(.peek) { padding-top: 40px; }
+	.miso.side { left: -78px; bottom: -9px; }
 	.etas { display: flex; gap: 10px; }
 	.etas .elev { flex: 1; padding: 12px; }
 	.eta { font-size: 28px; font-weight: 700; }

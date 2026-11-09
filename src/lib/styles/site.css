@@ -426,22 +426,10 @@ input, select, textarea { font: inherit; color: inherit; }
 .sf .picado { display: flex; height: 64px; overflow: hidden; }
 .sf .picado i { flex: 0 0 52px; height: 58px; clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%); margin-right: 4px; opacity: .95; }
 
-/* mascot */
-.sf .mascot { color: var(--q-text); }
-.sf .mascot .fur { fill: var(--q-fur); }
-.sf .mascot .hat { fill: var(--q-hat); }
-.sf .mascot .line { stroke: var(--q-mline); }
-.sf .mascot .ink { fill: var(--q-mline); }
-.sf .mascot .prop { fill: var(--q-brand); }
-.sf .mascot .blush { fill: var(--q-blush); }
-@media (prefers-reduced-motion: no-preference) {
-  .sf .mascot .bob { animation: mbob 2.6s ease-in-out infinite; transform-origin: 60px 100px; }
-  .sf .mascot .steam path { animation: msteam 2.2s ease-in-out infinite; }
-  .sf .mascot .zz { animation: mzz 3s ease-in-out infinite; }
-}
-@keyframes mbob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-@keyframes msteam { 0%, 100% { opacity: .2; transform: translateY(2px); } 50% { opacity: .9; transform: translateY(-3px); } }
-@keyframes mzz { 0%, 100% { opacity: .3; transform: translate(0, 2px); } 50% { opacity: 1; transform: translate(2px, -3px); } }
+/* Miso (src/lib/miso): the store colour, the whisker ink and the sticker edge */
+.sf .miso-art { display: inline-block; flex: none; line-height: 0; --miso-brand: var(--q-brand); --miso-ink: var(--q-text2); --miso-edge: #FFF8EC; }
+.miso-art svg { width: 100%; height: 100%; overflow: visible; }
+.miso-art svg.miso-peek { overflow: hidden; }
 
 /* cart drawer (tablet / laptop) */
 .sf .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 440px; max-width: 92%; z-index: 9; background: var(--q-surface);

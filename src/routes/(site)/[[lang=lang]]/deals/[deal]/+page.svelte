@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Icon from '$lib/components/Icon.svelte';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import doneArt from '$lib/miso/art/miso-done.svg?raw';
 	import ItemConfigurator from '$lib/components/ItemConfigurator.svelte';
 	import { cart } from '$lib/cart.svelte';
 	import { t } from '$lib/i18n';
@@ -76,7 +77,7 @@
 	{#if done}
 		<div class="state celebrate" role="status">
 			<div class="confetti" aria-hidden="true">{#each Array(22) as _, i (i)}<i style="left:{(i * 37) % 100}%;top:{8 + ((i * 53) % 46)}%;background:{['var(--q-brand)', 'var(--q-save)', 'var(--q-ok)', 'var(--q-info)'][i % 4]};transform:rotate({(i * 47) % 180}deg)"></i>{/each}</div>
-			{#if S.look.mascot === 'miso'}<Mascot pose="happy" size={180} />{/if}
+			{#if S.look.miso.pages}<Miso art={doneArt} size={170} decorative />{/if}
 			<h2>{T('dealDone')}</h2>
 			<p>{D.name}{#if save} · {T('savedYou', { m: money(save) })}{/if}</p>
 			<div class="actions"><a class="btn btn-p btn-lg btn-block" href="{b}/cart">{T('viewOrder')}</a><button type="button" class="btn btn-lg btn-block" onclick={restart}>{T('buildAnother')}</button></div>

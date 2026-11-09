@@ -13,12 +13,17 @@ test('published settings win; bad values fall back', () => {
 	const l = lookFrom({ preset: 'classic-paper', brand: '#123456', mascot: 'off', languages: ['en'], texts: { headline: 'Hi' } });
 	assert.equal(l.preset, 'classic-paper');
 	assert.equal(l.brand, '#123456');
-	assert.equal(l.mascot, 'off');
+	assert.deepEqual(l.miso, { pages: false, blocks: {} });
 	assert.deepEqual(l.languages, ['en']);
 	assert.equal(l.texts.headline, 'Hi');
 	const bad = lookFrom({ brand: 'red', languages: ['fr'] });
 	assert.equal(bad.brand, DEFAULT_LOOK.brand);
 	assert.deepEqual(bad.languages, DEFAULT_LOOK.languages);
+});
+
+test("Miso's optional places: pages on and the hero peeking by default; block spots from settings", () => {
+	assert.deepEqual(lookFrom({}).miso, { pages: true, blocks: { hero: 'peek' } });
+	assert.deepEqual(lookFrom({ miso_pages: false, miso_blocks: { hero: 'side', deals: 'off', hours: 'dance' } }).miso, { pages: false, blocks: { hero: 'side', deals: 'off' } });
 });
 
 test('slugs are unique across the menu, categories ordered by position', () => {

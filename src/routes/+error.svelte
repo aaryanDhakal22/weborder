@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import lostArt from '$lib/miso/art/miso-lost.svg?raw';
+	import pausedArt from '$lib/miso/art/miso-paused.svg?raw';
 	import { t } from '$lib/i18n';
 	import '$lib/styles/site.css';
 
@@ -15,7 +17,7 @@
 {/if}
 <div class="sf">
 	<div class="state">
-		<Mascot pose={page.status === 404 ? 'lost' : 'paused'} size={180} />
+		<Miso art={page.status === 404 ? lostArt : pausedArt} size={170} decorative />
 		<h1>{page.status === 404 ? t(L, 'lostTitle') : (L === 'es' ? 'Algo salió mal' : 'Something went wrong')}</h1>
 		<p>{page.status === 404 ? t(L, 'lostSub') : page.error?.message}</p>
 		<div class="actions"><a class="btn btn-p btn-lg btn-block" href="{b}/menu">{t(L, 'backMenu')}</a><a class="btn btn-lg btn-block" href={b || '/'}>{t(L, 'home')}</a></div>

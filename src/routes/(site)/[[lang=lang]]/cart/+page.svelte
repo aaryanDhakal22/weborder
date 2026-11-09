@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Icon from '$lib/components/Icon.svelte';
-	import Mascot from '$lib/components/Mascot.svelte';
+	import Miso from '$lib/components/Miso.svelte';
+	import emptyArt from '$lib/miso/art/miso-empty-cart.svg?raw';
 	import { cart } from '$lib/cart.svelte';
 	import { t } from '$lib/i18n';
 	import { money } from '$lib/fmt';
@@ -69,7 +70,7 @@
 
 {#if cart.ready && !cart.entries.length}
 	<div class="state">
-		{#if S.look.mascot === 'miso'}<Mascot pose="bowl" size={180} />{/if}
+		{#if S.look.miso.pages}<Miso art={emptyArt} size={170} decorative />{/if}
 		<h2>{T('emptyCart')}</h2>
 		<p>{T('emptyCartSub')}</p>
 		<div class="actions">{#if S.deals.length}<a class="btn btn-p btn-lg btn-block" href="{b}/deals">{T('seeDeals')}</a>{/if}<a class="btn btn-lg btn-block" class:btn-p={!S.deals.length} href="{b}/menu">{T('browse')}</a></div>

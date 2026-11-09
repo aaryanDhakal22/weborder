@@ -1,10 +1,10 @@
 // The store's look (Store › Website's published settings over the defaults) and the menu as the
 // pages use it (URL slugs). Pure, so unit tests run it directly.
-import type { Look, Menu } from './types.ts';
+import type { Look, Menu, MisoSpot } from './types.ts';
 import { slugify } from './util.ts';
 
 /** Until Store › Website exists: the Quibase look (theme zero) in Lombardi's red. */
-export const DEFAULT_LOOK: Look = { preset: 'pizzeria-loud', brand: '#E2363B', mascot: 'miso', languages: ['en', 'es'], texts: {} };
+export const DEFAULT_LOOK: Look = { preset: 'pizzeria-loud', brand: '#E2363B', miso: { pages: true, blocks: { hero: 'peek' } }, languages: ['en', 'es'], texts: {} };
 
 export function lookFrom(settings: Record<string, unknown>): Look {
 	const s = settings ?? {};
@@ -14,10 +14,23 @@ export function lookFrom(settings: Record<string, unknown>): Look {
 	return {
 		preset: str('preset') ?? DEFAULT_LOOK.preset,
 		brand: /^#[0-9a-f]{6}$/i.test(str('brand') ?? '') ? (str('brand') as string) : DEFAULT_LOOK.brand,
-		mascot: str('mascot') === 'off' ? 'off' : 'miso',
+		miso: misoFrom(s),
 		languages: langs.length ? langs : DEFAULT_LOOK.languages,
 		texts: texts as Look['texts']
 	};
+}
+
+/** Miso's optional places: `miso_pages` (default on) and `miso_blocks` ({block: peek|side|off}, default
+ *  the hero peeking). The old `mascot: 'off'` turns all of them off. */
+function misoFrom(s: Record<string, unknown>): Look['miso'] {
+	if (s.mascot === 'off') return { pages: false, blocks: {} };
+	const spots: MisoSpot[] = ['peek', 'side', 'off'];
+	const raw = s.miso_blocks;
+	const blocks =
+		raw && typeof raw === 'object'
+			? Object.fromEntries(Object.entries(raw as Record<string, unknown>).filter((e): e is [string, MisoSpot] => spots.includes(e[1] as MisoSpot)))
+			: { ...DEFAULT_LOOK.miso.blocks };
+	return { pages: s.miso_pages !== false, blocks };
 }
 
 /** Gives every category and item a URL slug (unique in the menu) and tags each item with its category. */
