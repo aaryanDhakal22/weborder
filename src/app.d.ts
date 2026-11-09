@@ -1,20 +1,16 @@
-import type { Store } from '$lib/types';
+import type { StoreView } from '$lib/types';
 
 declare global {
 	namespace App {
 		interface Locals {
-			/** The store this request's host resolved to (storefront hosts only). */
-			store: Store | null;
-			/** True on the admin host. */
-			adminHost: boolean;
-			/** True when an admin session cookie is valid. */
-			admin: boolean;
-			/** True for the publisher's own render requests and signed previews. */
-			preview: boolean;
-			/** The publisher's own render request (no preview banner, no noindex). */
-			render: boolean;
-			/** Preset/brand trial from a signed admin preview link. */
-			previewOverrides: { preset?: string; brand?: string } | null;
+			/** The store this request's host serves (null on every other host). */
+			store: StoreView | null;
+			/** The host as main knows it (X-Site-Host on every call). */
+			host: string;
+			/** The customer's IP, forwarded to main for its sign-in limits. */
+			ip: string;
+			/** The customer's session (qcs_…) from the host-only cookie, if signed in. */
+			session: string | null;
 		}
 		interface PageState {
 			sheet?: string;

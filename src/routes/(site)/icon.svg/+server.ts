@@ -6,7 +6,7 @@ import { esc } from '$lib/util';
 export const GET = async ({ locals, url }) => {
 	const store = locals.store;
 	if (!store) error(404);
-	const p = buildTheme(store.site.preset, store.site.brand).palette;
+	const p = buildTheme(store.look.preset, store.look.brand).palette;
 	const words = store.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(Boolean);
 	const initials = (words.length > 1 && words[0].length <= 3 ? words[0][0] + words[1][0] : words[0]?.[0] ?? 'Q').toUpperCase();
 	const pad = url.searchParams.has('maskable') ? 0 : 48;

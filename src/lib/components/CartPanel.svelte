@@ -16,9 +16,9 @@
 		<div>
 			{#each cart.entries as e, i (i)}
 				<div class="line">
-					<span class="qty">{e.line.qty}</span>
+					<span class="qty">{e.line.qty ?? 1}</span>
 					<div class="txt"><span class="nm">{e.name}</span>{#if e.mods.length}<span class="mods">{e.mods.join(' · ')}</span>{/if}</div>
-					<span class="pr num">{money(e.unitCents * e.line.qty)}</span>
+					<span class="pr num">{money(e.unitCents * (e.line.qty ?? 1))}</span>
 				</div>
 			{/each}
 		</div>

@@ -1,37 +1,52 @@
 <script lang="ts">
 	import DealCard from '$lib/components/DealCard.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { t, tr } from '$lib/i18n';
+	import Mascot from '$lib/components/Mascot.svelte';
+	import { t } from '$lib/i18n';
+	import { live } from '$lib/engine';
 
 	let { data } = $props();
 	const L = $derived(data.lang);
 	const b = $derived(data.base);
+	const S = $derived(data.store);
 	let filter = $state<'all' | 'bundle' | 'auto' | 'code'>('all');
-	const shown = $derived(data.deals.filter((d) => filter === 'all' || (filter === 'auto' ? d.kind === 'mix' || d.kind === 'nth' : d.kind === filter)));
-	const desc = $derived(`${data.store.name} deals: ${data.deals.map((d) => tr(d, 'name', L)).join(', ')}.`);
-	const F = $derived([['all', t(L, 'all')], ['bundle', L === 'es' ? 'Paquetes' : 'Bundles'], ['auto', L === 'es' ? 'Automáticas' : 'Automatic'], ['code', L === 'es' ? 'Códigos' : 'Codes']] as const);
+	const shown = $derived(S.deals.filter((d) => filter === 'all' || (filter === 'auto' ? d.kind === 'mix' || d.kind === 'nth' || d.kind === 'free_item' : d.kind === filter)));
+	const desc = $derived(S.deals.length ? `${S.name} ${L === 'es' ? 'ofertas' : 'deals'}: ${S.deals.map((d) => d.name).join(', ')}.` : `${S.name} ${L === 'es' ? 'ofertas' : 'deals'}.`);
+	const F = $derived([['all', t(L, 'all')], ['bundle', t(L, 'bundles')], ['auto', t(L, 'automatic')], ['code', t(L, 'codes')]] as const);
+	const now = new Date();
 </script>
 
 <svelte:head>
 	<title>{data.title}</title>
 	<meta name="description" content={desc} />
 	<link rel="canonical" href="{data.origin}{b}/deals" />
-	{@html `<script type="application/ld+json">${data.ld}</script>`}
+	{#if S.deals.length}{@html `<script type="application/ld+json">${data.ld}</script>`}{/if}
 </svelte:head>
 
 <div class="pad head">
 	<span class="eyebrow">{t(L, 'thisWeek')}</span>
 	<h1>{t(L, 'deals')}</h1>
-	<div class="chips" role="radiogroup" aria-label="Filter">
-		{#each F as [k, label] (k)}<button type="button" role="radio" aria-checked={filter === k} class="chip" class:on={filter === k} onclick={() => (filter = k)}>{label}</button>{/each}
+	{#if S.deals.length > 1}
+		<div class="chips" role="radiogroup" aria-label={t(L, 'filter')}>
+			{#each F as [k, label] (k)}<button type="button" role="radio" aria-checked={filter === k} class="chip" class:on={filter === k} onclick={() => (filter = k)}>{label}</button>{/each}
+		</div>
+	{/if}
+</div>
+{#if S.deals.length}
+	<div class="pad grid">
+		{#each shown as d, i (d.id)}
+			<DealCard deal={d} lang={L} live={live(d, S.timezone, now, '')} alt={i % 2 === 1} href="{b}/deals/{d.id}" />
+		{/each}
 	</div>
-</div>
-<div class="pad grid">
-	{#each shown as d, i (d.id)}
-		<DealCard deal={d} lang={L} live={d.live} alt={i % 2 === 1} href={`${b}/deals/${d.slug}`} />
-	{/each}
-</div>
-<div class="pad foot-note"><div class="banner info"><Icon name="tag" size={20} /><span class="grow">{t(L, 'haveCode')}</span></div></div>
+	<div class="pad foot-note"><div class="banner info"><Icon name="tag" size={20} /><span class="grow">{t(L, 'haveCode')}</span></div></div>
+{:else}
+	<div class="state">
+		{#if S.look.mascot === 'miso'}<Mascot pose="dough" size={170} />{/if}
+		<h2>{t(L, 'noDeals')}</h2>
+		<p>{t(L, 'noDealsSub')}</p>
+		<a class="btn btn-p btn-lg" href="{b}/menu">{t(L, 'seeMenu')}</a>
+	</div>
+{/if}
 
 <style>
 	.head { padding-top: 24px; padding-bottom: 8px; display: flex; flex-direction: column; gap: 14px; }

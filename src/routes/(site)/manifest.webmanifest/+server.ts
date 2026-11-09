@@ -5,7 +5,7 @@ import { buildTheme } from '$lib/theme';
 export const GET = async ({ locals }) => {
 	const store = locals.store;
 	if (!store) error(404);
-	const theme = buildTheme(store.site.preset, store.site.brand);
+	const theme = buildTheme(store.look.preset, store.look.brand);
 	const manifest = {
 		id: '/',
 		name: store.name,
@@ -16,7 +16,7 @@ export const GET = async ({ locals }) => {
 		display: 'standalone',
 		background_color: theme.palette.canvas,
 		theme_color: theme.palette.canvas,
-		lang: store.site.languages[0],
+		lang: store.look.languages[0],
 		icons: [
 			{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
 			{ src: '/icon.svg?maskable', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' }

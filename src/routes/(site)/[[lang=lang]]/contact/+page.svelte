@@ -2,13 +2,15 @@
 	import HoursCard from '$lib/components/HoursCard.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { t } from '$lib/i18n';
+	import { fmtPhone, telHref } from '$lib/fmt';
 
 	let { data } = $props();
 	const S = $derived(data.store);
 	const L = $derived(data.lang);
 	const b = $derived(data.base);
-	const title = $derived(`${t(L, 'hours')} & ${t(L, 'contact')} · ${S.name}, ${S.address.city}, ${S.address.state}`);
-	const desc = $derived(`${S.name}, ${S.address.line1}, ${S.address.city}, ${S.address.state} ${S.address.zip}. ${S.phone}.`);
+	const where = $derived([S.address.line1, S.address.line2].filter(Boolean).join(', '));
+	const title = $derived(`${t(L, 'hours')} & ${t(L, 'contact')} · ${S.name}${S.address.line2 ? `, ${S.address.line2}` : ''}`);
+	const desc = $derived(`${S.name}${where ? `, ${where}` : ''}.${S.phone ? ` ${fmtPhone(S.phone)}.` : ''}`);
 </script>
 
 <svelte:head>
@@ -18,12 +20,12 @@
 </svelte:head>
 
 <div class="pad head">
-	<span class="eyebrow">{S.cuisine.join(' · ')}</span>
+	<span class="eyebrow">{S.name}</span>
 	<h1>{t(L, 'visit')}</h1>
-	<p class="t2">{S.address.line1}, {S.address.city}, {S.address.state} {S.address.zip}</p>
-	<div class="ctas"><a class="btn btn-p" href="{b}/menu">{t(L, 'startOrder')}</a><a class="btn" href="tel:{S.phone.replace(/\D/g, '')}"><Icon name="phone" size={18} /> {S.phone}</a></div>
+	{#if where}<p class="t2">{where}</p>{/if}
+	<div class="ctas"><a class="btn btn-p" href="{b}/menu">{t(L, 'startOrder')}</a>{#if S.phone}<a class="btn" href={telHref(S.phone)}><Icon name="phone" size={18} /> {fmtPhone(S.phone)}</a>{/if}</div>
 </div>
-<section class="section pad"><HoursCard store={S} lang={L} /></section>
+<section class="section pad"><HoursCard store={S} status={data.status} lang={L} /></section>
 
 <style>
 	.head { padding-top: 28px; display: flex; flex-direction: column; gap: 12px; }

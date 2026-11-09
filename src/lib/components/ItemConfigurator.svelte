@@ -1,112 +1,140 @@
-<!-- Configures one item: size, option groups (with halves), notes and quantity. Prices with the same
-     function the server uses, so what the customer sees is what the quote returns. -->
+<!-- Configures one item: a choice (merged items), size, option groups (with halves), notes and
+     quantity. Priced with main's engine copy, so the number shown is the number main quotes. -->
 <script lang="ts">
 	import Icon from './Icon.svelte';
 	import Portion from './Portion.svelte';
 	import PizzaPie from './PizzaPie.svelte';
-	import FoodArt from './FoodArt.svelte';
-	import type { Group, Item, Lang, Menu, OptPick, Portion as P } from '$lib/types';
-	import { priceSelection, money } from '$lib/pricing';
-	import { t, tr } from '$lib/i18n';
-	import type { CartEntry } from '$lib/cart.svelte';
+	import ItemTile from './ItemTile.svelte';
+	import type { CartEntry, Context, Lang, Menu, MenuGroup, MenuItem, Pick, Portion as P } from '$lib/types';
+	import { groupsOf, optionPrice, priceLine, sizeShort } from '$lib/menu';
+	import { money } from '$lib/fmt';
+	import { t } from '$lib/i18n';
 
 	let {
 		item,
-		groups,
+		menu,
+		ctx,
 		lang,
 		soldOut = false,
-		freeOptions = 0,
 		allowedSizes,
 		submitLabel,
 		onsubmit,
 		onclose,
-		showArt = false,
-		headingTag = 'h2'
+		headingTag = 'h2',
+		showQty = true,
+		showTile = false
 	}: {
-		item: Item;
-		groups: Record<string, Group>;
+		item: MenuItem;
+		menu: Menu;
+		ctx: Context;
 		lang: Lang;
 		soldOut?: boolean;
-		freeOptions?: number;
-		allowedSizes?: string[];
+		/** Size ids a deal slot allows (empty = any). */
+		allowedSizes?: string[] | null;
 		submitLabel?: string;
 		onsubmit: (entry: CartEntry) => void;
 		onclose?: () => void;
-		showArt?: boolean;
 		headingTag?: 'h1' | 'h2';
+		showQty?: boolean;
+		showTile?: boolean;
 	} = $props();
 
 	const T = (k: Parameters<typeof t>[1], v?: Record<string, string | number>) => t(lang, k, v);
-	const itemGroups = $derived((item.groups ?? []).map((g) => groups[g]).filter(Boolean));
-	const sizes = $derived((item.sizes ?? []).filter((s) => !allowedSizes?.length || allowedSizes.includes(s.name)));
+	const groups = $derived(groupsOf(menu, item));
+	const choices = $derived((item.choices ?? []).filter((c) => !c.sold_out));
+	let choiceId = $state<string | undefined>(undefined);
+	const choice = $derived(choices.find((c) => c.item_id === choiceId));
+	const baseSizes = $derived(choice ? choice.sizes : item.sizes);
+	const sizes = $derived(baseSizes.filter((s) => !allowedSizes?.length || allowedSizes.includes(s.size_id)));
 	let sizeId = $state<string | undefined>(undefined);
-	let picks = $state<OptPick[]>([]);
+	let picks = $state<Pick[]>([]);
 	let qty = $state(1);
 	let note = $state('');
 
-	// Reset when the item changes (sheet reused for another item).
+	// Reset when the item changes (the sheet is reused for another item).
 	let lastItem = '';
 	$effect.pre(() => {
 		if (item.id === lastItem) return;
 		lastItem = item.id;
-		sizeId = (sizes.find((s) => s.default) ?? sizes[0])?.id;
-		picks = itemGroups.flatMap((g) => g.options.filter((o) => o.default).map((o) => ({ g: g.id, o: o.id, ...(g.portions ? { p: 'whole' as P } : {}) })));
+		choiceId = choices[0]?.item_id;
+		const ss = (choices[0]?.sizes ?? item.sizes).filter((s) => !allowedSizes?.length || allowedSizes.includes(s.size_id));
+		sizeId = ss[0]?.size_id;
+		picks = groups.flatMap((g) => g.options.filter((o) => o.is_default && !o.sold_out).map((o) => ({ group_id: g.id, option_id: o.id, ...(g.portions ? { portion: 'whole' } : {}) })));
 		qty = 1;
 		note = '';
 	});
+	// A size the new choice doesn't have: take its first.
+	$effect.pre(() => {
+		if (sizes.length && !sizes.some((s) => s.size_id === sizeId)) sizeId = sizes[0].size_id;
+		if (!sizes.length) sizeId = undefined;
+	});
 
-	const menuLike = $derived<Menu>({ categories: [{ id: '_', slug: '_', name: '', items: [item] }], groups });
-	const priced = $derived(priceSelection(menuLike, { itemId: item.id, sizeId, opts: picks }, freeOptions));
-	const missing = $derived(itemGroups.find((g) => picks.filter((p) => p.g === g.id).length < g.min));
-	const isPizza = $derived(itemGroups.some((g) => g.portions));
+	const line = $derived({ item_id: item.id, ...(choiceId ? { choice_id: choiceId } : {}), ...(sizeId ? { size_id: sizeId } : {}), options: picks, qty, ...(note.trim() ? { note: note.trim() } : {}) });
+	const priced = $derived(priceLine(ctx, line));
+	const need = (g: MenuGroup) => Math.max(g.min_select, g.required ? 1 : 0);
+	const count = (g: MenuGroup) => picks.filter((p) => p.group_id === g.id).length;
+	const missing = $derived(groups.find((g) => count(g) < need(g)));
+	const isPizza = $derived(groups.some((g) => g.portions));
+	const single = (g: MenuGroup) => g.max_select === 1;
 	const toppings = $derived(
-		itemGroups.filter((g) => g.portions).flatMap((g) => picks.filter((p) => p.g === g.id).map((p) => ({ id: p.o, name: g.options.find((o) => o.id === p.o)?.name ?? '', p: p.p ?? ('whole' as P) })))
+		groups.filter((g) => g.portions).flatMap((g) => picks.filter((p) => p.group_id === g.id).map((p) => ({ id: p.option_id, name: g.options.find((o) => o.id === p.option_id)?.name ?? '', p: (p.portion || 'whole') as P })))
 	);
 
-	const picked = (g: Group, o: string) => picks.find((p) => p.g === g.id && p.o === o);
-	function toggle(g: Group, o: string) {
-		const has = picked(g, o);
-		if (g.max === 1) {
-			picks = [...picks.filter((p) => p.g !== g.id), { g: g.id, o }];
+	const picked = (g: MenuGroup, o: string) => picks.find((p) => p.group_id === g.id && p.option_id === o);
+	function toggle(g: MenuGroup, o: string) {
+		if (single(g)) {
+			const was = picked(g, o);
+			picks = [...picks.filter((p) => p.group_id !== g.id), ...(was && need(g) === 0 ? [] : [{ group_id: g.id, option_id: o }])];
 			return;
 		}
-		if (has) picks = picks.filter((p) => !(p.g === g.id && p.o === o));
-		else if (!g.max || picks.filter((p) => p.g === g.id).length < g.max) picks = [...picks, { g: g.id, o, ...(g.portions ? { p: 'whole' as P } : {}) }];
+		if (picked(g, o)) picks = picks.filter((p) => !(p.group_id === g.id && p.option_id === o));
+		else if (!g.max_select || count(g) < g.max_select) picks = [...picks, { group_id: g.id, option_id: o, ...(g.portions ? { portion: 'whole' } : {}) }];
 	}
-	function setPortion(g: Group, o: string, p: P) {
-		picks = picks.map((x) => (x.g === g.id && x.o === o ? { ...x, p } : x));
+	function setPortion(g: MenuGroup, o: string, portion: P) {
+		picks = picks.map((x) => (x.group_id === g.id && x.option_id === o ? { ...x, portion } : x));
 	}
-	const rule = (g: Group) => (g.min && g.max === 1 ? T('pick', { n: 1 }) : g.max ? T('upTo', { n: g.max }) : T('pickAny'));
-	const optPrice = (o: { priceCents: number; sizePrices?: Record<string, number> }) => (sizeId && o.sizePrices?.[sizeId] !== undefined ? o.sizePrices[sizeId] : o.priceCents);
+	const rule = (g: MenuGroup) => (need(g) && single(g) ? T('pick', { n: 1 }) : g.max_select ? T('upTo', { n: g.max_select }) : T('pickAny'));
 
 	function submit() {
-		if (missing || soldOut) return;
+		if (missing || soldOut || priced.error) return;
 		const mods = note.trim() ? [...priced.mods, `“${note.trim()}”`] : priced.mods;
-		onsubmit({ line: { kind: 'item', itemId: item.id, sizeId, opts: picks, qty, ...(note.trim() ? { note: note.trim() } : {}) }, name: item.name, mods, unitCents: priced.unitCents });
+		onsubmit({ line: JSON.parse(JSON.stringify(line)), name: priced.name || item.name, mods, unitCents: priced.unit });
 	}
 </script>
 
 <div class="cfg">
-	{#if showArt && !isPizza}<FoodArt art={item.art} />{/if}
 	<div class="cfg-head">
-		<div>
-			{#if item.popular}<span class="tag tag-pop"><Icon name="flame" size={12} /> {T('popular')}</span>{/if}
-			<svelte:element this={headingTag} class="cfg-title">{tr(item, 'name', lang)}</svelte:element>
-			{#if tr(item, 'desc', lang)}<p class="t2 cfg-desc">{tr(item, 'desc', lang)}</p>{/if}
-			{#if isPizza}<p class="muted cfg-desc">{T('halvesSame')}</p>{/if}
+		{#if showTile && !isPizza}<ItemTile name={item.name} small />{/if}
+		<div class="grow">
+			<svelte:element this={headingTag} class="cfg-title">{item.name}</svelte:element>
+			{#if item.description}<p class="t2 cfg-desc">{item.description}</p>{/if}
+			{#if isPizza}<p class="muted cfg-desc">{T('toppingsHint')}</p>{/if}
 		</div>
 		{#if onclose}<button type="button" class="btn btn-icon btn-ghost" onclick={onclose} aria-label={T('close')}><Icon name="x" size={22} /></button>{/if}
 	</div>
 
 	<div class="builder-cols" class:solo={!isPizza}>
-		{#if isPizza || sizes.length > 1}
+		{#if isPizza || sizes.length > 1 || choices.length > 1}
 			<div class="pizza-top">
 				{#if isPizza}<PizzaPie {toppings} />{/if}
+				{#if choices.length > 1}
+					<fieldset class="grp">
+						<legend class="grp-h"><h3 class="grp-name">{T('choose')}</h3><span class="rule"><span class="req">{T('required')}</span></span></legend>
+						{#each choices as c (c.item_id)}
+							<div class="opt">
+								<button type="button" class="opt-main" role="radio" aria-checked={choiceId === c.item_id} onclick={() => (choiceId = c.item_id)}>
+									<span class="radio" class:on={choiceId === c.item_id}></span><span class="nm">{c.name}</span>
+								</button>
+							</div>
+						{/each}
+					</fieldset>
+				{/if}
 				{#if sizes.length > 1}
 					<div class="sizes-seg" role="radiogroup" aria-label={T('size')}>
-						{#each sizes as s (s.id)}
-							<button type="button" role="radio" aria-checked={sizeId === s.id} class:on={sizeId === s.id} onclick={() => (sizeId = s.id)}>
-								<span class="s1">{s.short ?? s.name}</span>{#if s.short}<span class="s2">{s.name.replace(s.short, '').trim()}</span>{/if}<span class="s3 num">{money(s.priceCents)}</span>
+						{#each sizes as s (s.size_id)}
+							{@const short = sizeShort(menu, s.size_id, s.name)}
+							<button type="button" role="radio" aria-checked={sizeId === s.size_id} class:on={sizeId === s.size_id} onclick={() => (sizeId = s.size_id)}>
+								<span class="s1">{short}</span>{#if short !== s.name}<span class="s2">{s.name.replace(short, '').trim()}</span>{/if}<span class="s3 num">{money(s.price_cents)}</span>
 							</button>
 						{/each}
 					</div>
@@ -114,25 +142,25 @@
 			</div>
 		{/if}
 		<div>
-			{#each itemGroups as g (g.id)}
+			{#each groups as g (g.id)}
 				<fieldset class="grp">
-					<legend class="grp-h"><h3 class="grp-name">{tr(g, 'name', lang)}</h3><span class="rule">{#if g.min}<span class="req">{T('required')}</span> · {/if}{rule(g)}</span></legend>
-					{#if g.portions}<p class="muted hint">{T('toppingsHint')}</p>{/if}
+					<legend class="grp-h"><h3 class="grp-name">{g.name}</h3><span class="rule">{#if need(g)}<span class="req">{T('required')}</span> · {/if}{rule(g)}</span></legend>
 					{#each g.options as o (o.id)}
 						{@const on = picked(g, o.id)}
-						<div class="opt">
-							<button type="button" class="opt-main" role={g.max === 1 ? 'radio' : 'checkbox'} aria-checked={!!on} onclick={() => toggle(g, o.id)}>
-								<span class={g.max === 1 ? 'radio' : 'check'} class:on={!!on}>{#if on && g.max !== 1}<Icon name="check" size={14} stroke={3} />{/if}</span>
-								<span class="nm">{tr(o, 'name', lang)}</span>
+						{@const p = optionPrice(o, sizeId)}
+						<div class="opt" class:off={o.sold_out}>
+							<button type="button" class="opt-main" role={single(g) ? 'radio' : 'checkbox'} aria-checked={!!on} disabled={o.sold_out && !on} onclick={() => toggle(g, o.id)}>
+								<span class={single(g) ? 'radio' : 'check'} class:on={!!on}>{#if on && !single(g)}<Icon name="check" size={14} stroke={3} />{/if}</span>
+								<span class="nm">{o.name}{#if o.sold_out} <span class="tag tag-brand">{T('soldOut')}</span>{/if}</span>
 							</button>
 							{#if g.portions && on}
-								<span class="portion" role="radiogroup" aria-label="{tr(o, 'name', lang)}: {T('whole')} / {T('left')} / {T('right')}">
+								<span class="portion" role="radiogroup" aria-label="{o.name}: {T('whole')} / {T('left')} / {T('right')}">
 									{#each ['left', 'whole', 'right'] as const as k (k)}
-										<button type="button" role="radio" aria-checked={on.p === k} aria-label={T(k)} class:on={on.p === k} onclick={() => setPortion(g, o.id, k)}><Portion kind={k} /></button>
+										<button type="button" role="radio" aria-checked={(on.portion || 'whole') === k} aria-label={T(k)} class:on={(on.portion || 'whole') === k} onclick={() => setPortion(g, o.id, k)}><Portion kind={k} /></button>
 									{/each}
 								</span>
 							{/if}
-							<span class="pr">{optPrice(o) ? '+' + money(optPrice(o)) : ''}</span>
+							<span class="pr">{p ? '+' + money(p) : ''}</span>
 						</div>
 					{/each}
 				</fieldset>
@@ -147,27 +175,29 @@
 	</div>
 </div>
 <div class="sheet-foot">
-	<span class="stepper">
-		<button type="button" aria-label="−" onclick={() => (qty = Math.max(1, qty - 1))}><Icon name="minus" size={18} /></button>
-		<b aria-live="polite">{qty}</b>
-		<button type="button" aria-label="+" onclick={() => (qty = Math.min(50, qty + 1))}><Icon name="plus" size={18} /></button>
-	</span>
-	<button type="button" class="btn btn-p btn-lg grow" disabled={!!missing || soldOut} onclick={submit}>
-		<span class="split"><span>{soldOut ? T('soldOut') : missing ? `${T('pick', { n: missing.min })}: ${tr(missing, 'name', lang)}` : (submitLabel ?? T('addToOrder'))}</span>{#if !soldOut}<span class="num">{money(priced.unitCents * qty)}</span>{/if}</span>
+	{#if showQty}
+		<span class="stepper">
+			<button type="button" aria-label={T('less')} onclick={() => (qty = Math.max(1, qty - 1))}><Icon name="minus" size={18} /></button>
+			<b aria-live="polite">{qty}</b>
+			<button type="button" aria-label={T('more')} onclick={() => (qty = Math.min(50, qty + 1))}><Icon name="plus" size={18} /></button>
+		</span>
+	{/if}
+	<button type="button" class="btn btn-p btn-lg grow" disabled={!!missing || soldOut || !!priced.error} onclick={submit}>
+		<span class="split"><span>{soldOut ? T('soldOut') : missing ? `${T('pick', { n: need(missing) })}: ${missing.name}` : (submitLabel ?? T('addToOrder'))}</span>{#if !soldOut && showQty}<span class="num">{money(priced.unit * qty)}</span>{/if}</span>
 	</button>
 </div>
 
 <style>
-	.cfg { display: flex; flex-direction: column; }
-	.cfg :global(.photo) { min-height: 170px; border-radius: 0; }
+	.cfg { display: flex; flex-direction: column; flex: 1 0 auto; }
 	.cfg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 20px 6px; }
+	.grow { flex: 1; min-width: 0; }
 	.cfg-title { font-size: 32px; margin-top: 6px; }
 	.cfg-desc { font-size: 15px; margin-top: 6px; }
 	.grp { border: 0; margin: 0; min-width: 0; }
 	.grp-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; width: 100%; padding: 0; }
 	.grp-name { font-size: 20px; }
-	.hint { font-size: 13px; margin-top: -4px; }
 	.opt-main { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; min-height: 46px; text-align: left; }
+	.opt.off { opacity: 0.55; }
 	.sizes-seg button { border: var(--q-border-w) solid var(--q-border); border-radius: var(--q-r-md); padding: 10px; display: flex; flex-direction: column; gap: 2px; align-items: center; }
 	.sizes-seg button.on { border: 2px solid var(--q-brand); background: var(--q-brand-soft); }
 	.portion button { width: 34px; height: 30px; border-radius: 999px; display: grid; place-items: center; color: var(--q-muted); }
@@ -176,7 +206,6 @@
 	.field { display: flex; flex-direction: column; gap: 4px; }
 	.field input { min-height: 46px; border-radius: var(--q-r-md); border: var(--q-border-w) solid var(--q-border-strong); background: var(--q-field-bg); padding: 8px 12px; }
 	.lbl { font-size: 13px; font-weight: 600; color: var(--q-text2); }
-	.grow { flex: 1; }
 	.btn:disabled { opacity: 0.6; cursor: not-allowed; }
 	.solo { display: block; }
 </style>

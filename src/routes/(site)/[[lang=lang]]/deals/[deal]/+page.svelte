@@ -2,39 +2,42 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Mascot from '$lib/components/Mascot.svelte';
 	import ItemConfigurator from '$lib/components/ItemConfigurator.svelte';
-	import { cart, type CartEntry } from '$lib/cart.svelte';
-	import { t, tr } from '$lib/i18n';
-	import { money, fromPrice } from '$lib/fmt';
-	import { priceSelection } from '$lib/pricing';
-	import type { DealPick, Item, Menu } from '$lib/types';
+	import { cart } from '$lib/cart.svelte';
+	import { t } from '$lib/i18n';
+	import { money } from '$lib/fmt';
+	import { contextOf, eligibleItems, fromPrice } from '$lib/menu';
+	import { live, price } from '$lib/engine';
+	import type { CartEntry, Line, MenuItem } from '$lib/types';
 
 	let { data } = $props();
 	const L = $derived(data.lang);
 	const b = $derived(data.base);
-	const D = $derived(data.deal);
+	const S = $derived(data.store);
+	const D = $derived(S.deals.find((d) => d.id === data.dealId)!);
+	const ctx = $derived(contextOf(S));
 	const T = (k: Parameters<typeof t>[1], v?: Record<string, string | number>) => t(L, k, v);
+	const soldOut = $derived(data.status?.sold_out ?? []);
+	const isOn = $derived(live(D, S.timezone, new Date(), ''));
+	const slots = $derived((D.slots ?? []).map((s) => ({ ...s, items: eligibleItems(S, s.eligible) })));
+	const counts = $derived(D.kind === 'bundle' ? [] : eligibleItems(S, D.eligible));
 
 	let picks = $state<(CartEntry | null)[]>([]);
 	let step = $state(0);
-	let choosing = $state<Item | null>(null);
+	let choosing = $state<MenuItem | null>(null);
 	let done = $state(false);
 	$effect.pre(() => {
-		if (picks.length !== data.slots.length) picks = data.slots.map(() => null);
+		if (picks.length !== slots.length) picks = slots.map(() => null);
 	});
 
-	const menuLike = $derived<Menu>({ categories: [{ id: '_', slug: '_', name: '', items: data.slots.flatMap((s) => s.items) }], groups: data.groups });
-	const extras = $derived(picks.reduce((s, p, i) => (p && p.line.kind === 'item' ? s + priceSelection(menuLike, { itemId: p.line.itemId, sizeId: p.line.sizeId, opts: p.line.opts }, data.slots[i].includedOptions ?? 0).extrasCents : s), 0));
-	const regular = $derived(picks.reduce((s, p) => (p && p.line.kind === 'item' ? s + priceSelection(menuLike, { itemId: p.line.itemId, sizeId: p.line.sizeId, opts: p.line.opts }).unitCents : s), 0));
-	const total = $derived((D.priceCents ?? 0) + extras);
-	const save = $derived(Math.max(0, (picks.every(Boolean) ? regular : (D.regularCents ?? regular)) - total));
+	// A bundle line names the deal and one pick per step (main's CartLine needs no item_id here).
+	const bundleLine = $derived({ deal_id: D.id, qty: 1, picks: picks.map((p) => (p ? { item_id: p.line.item_id, choice_id: p.line.choice_id, size_id: p.line.size_id, options: p.line.options } : { item_id: '' })) } as unknown as Line);
+	const total = $derived(picks.every(Boolean) && picks.length ? (price(ctx, { type: cart.fulfil, lines: [bundleLine] }, new Date()).lines[0]?.unit_cents ?? D.price_cents ?? 0) : (D.price_cents ?? 0));
+	const regular = $derived(picks.reduce((s, p) => s + (p?.unitCents ?? 0), 0));
+	const save = $derived(picks.every(Boolean) ? Math.max(0, regular - total) : 0);
 	const filled = $derived(picks.filter(Boolean).length);
-	const pct = $derived(Math.round(((filled + (choosing ? 0.5 : 0)) / Math.max(1, data.slots.length)) * 100));
+	const pct = $derived(Math.round(((filled + (choosing ? 0.5 : 0)) / Math.max(1, slots.length)) * 100));
 
-	function choose(item: Item) {
-		choosing = item;
-	}
 	function onpick(entry: CartEntry) {
-		if (entry.line.kind !== 'item') return;
 		picks[step] = entry;
 		choosing = null;
 		const next = picks.findIndex((p) => !p);
@@ -42,56 +45,54 @@
 		else finish();
 	}
 	function finish() {
-		const lines: DealPick[] = picks.map((p) => (p!.line.kind === 'item' ? { itemId: p!.line.itemId, sizeId: p!.line.sizeId, opts: p!.line.opts } : { itemId: '', opts: [] }));
-		cart.add({ line: { kind: 'deal', dealId: D.id, picks: lines, qty: 1 }, name: D.name, mods: picks.map((p) => [p!.name, ...p!.mods].join(' · ')), unitCents: total });
+		cart.add({ line: JSON.parse(JSON.stringify(bundleLine)), name: D.name, mods: picks.map((p) => [p!.name, ...p!.mods].join(' · ')), unitCents: total });
 		done = true;
 	}
 	function restart() {
-		picks = data.slots.map(() => null);
+		picks = slots.map(() => null);
 		step = 0;
 		done = false;
 	}
-	const fromLabel = (i: Item, sizes?: string[]) => money(i.sizes?.length ? Math.min(...i.sizes.filter((s) => !sizes?.length || sizes.includes(s.name)).map((s) => s.priceCents)) : fromPrice(i));
 </script>
 
 <svelte:head>
 	<title>{data.title}</title>
-	<meta name="description" content="{tr(D, 'desc', L)} {D.priceCents !== undefined ? money(D.priceCents) : ''}" />
-	<link rel="canonical" href="{data.origin}{b}/deals/{D.slug}" />
+	<meta name="description" content="{D.description || D.name}{D.price_cents ? ` ${money(D.price_cents)}` : ''}" />
+	<link rel="canonical" href="{data.origin}{b}/deals/{D.id}" />
 	{@html `<script type="application/ld+json">${data.ld}</script>`}
 </svelte:head>
 
 <div class="backbar pad">
 	<a class="btn btn-icon btn-ghost" href="{b}/deals" aria-label={T('back')}><Icon name="left" size={22} /></a>
-	<h1>{tr(D, 'name', L)}</h1>
-	{#if D.priceCents !== undefined}<span class="num big">{money(total)}</span>{/if}
+	<h1>{D.name}</h1>
+	{#if D.kind === 'bundle' && D.price_cents}<span class="num big">{money(total)}</span>{/if}
 </div>
 
-{#if !D.live}
-	<div class="pad"><div class="banner warn"><Icon name="clock" size={18} /><span class="grow">{L === 'es' ? 'Esta oferta no está disponible ahora mismo.' : "This deal isn't on right now."} {tr(D, 'desc', L)}</span></div></div>
+{#if !isOn}
+	<div class="pad"><div class="banner warn"><Icon name="clock" size={18} /><span class="grow">{T('dealOff')}</span></div></div>
 {/if}
 
 {#if D.kind === 'bundle'}
 	{#if done}
 		<div class="state celebrate" role="status">
 			<div class="confetti" aria-hidden="true">{#each Array(22) as _, i (i)}<i style="left:{(i * 37) % 100}%;top:{8 + ((i * 53) % 46)}%;background:{['var(--q-brand)', 'var(--q-save)', 'var(--q-ok)', 'var(--q-info)'][i % 4]};transform:rotate({(i * 47) % 180}deg)"></i>{/each}</div>
-			<Mascot pose="happy" size={180} />
+			{#if S.look.mascot === 'miso'}<Mascot pose="happy" size={180} />{/if}
 			<h2>{T('dealDone')}</h2>
-			<p>{tr(D, 'name', L)} · {T('savedYou', { m: money(save) })}</p>
-			<div class="actions"><a class="btn btn-p btn-lg btn-block" href="{b}/cart">{T('viewOrder')}</a><button type="button" class="btn btn-lg btn-block" onclick={restart}>{L === 'es' ? 'Armar otro' : 'Build another'}</button></div>
+			<p>{D.name}{#if save} · {T('savedYou', { m: money(save) })}{/if}</p>
+			<div class="actions"><a class="btn btn-p btn-lg btn-block" href="{b}/cart">{T('viewOrder')}</a><button type="button" class="btn btn-lg btn-block" onclick={restart}>{T('buildAnother')}</button></div>
 		</div>
 	{:else}
 		<div class="pad progress-wrap">
-			<div class="row-between"><span class="eyebrow">{T('step', { a: Math.min(filled + 1, data.slots.length), b: data.slots.length })}</span>{#if save > 0}<span class="savings"><Icon name="spark" size={16} stroke={2.5} /> {T('youSave')} <span class="num">{money(save)}</span></span>{/if}</div>
+			<div class="row-between"><span class="eyebrow">{T('step', { a: Math.min(filled + 1, slots.length), b: slots.length })}</span>{#if save > 0}<span class="savings"><Icon name="spark" size={16} stroke={2.5} /> {T('youSave')} <span class="num">{money(save)}</span></span>{/if}</div>
 			<div class="progress" role="progressbar" aria-valuenow={pct} aria-valuemin="0" aria-valuemax="100"><i style="width:{pct}%"></i></div>
 		</div>
 		<div class="pad two-col builder">
 			<ol class="slots">
-				{#each data.slots as s, i (i)}
+				{#each slots as s, i (i)}
 					<li>
 						<button type="button" class="slot" class:done={!!picks[i]} class:now={i === step} onclick={() => { step = i; choosing = null; }}>
 							<span class="n">{#if picks[i]}<Icon name="check" size={18} stroke={3} />{:else}{i + 1}{/if}</span>
-							<span class="txt"><span class="l1">{tr(s, 'label', L)}</span><span class="l2">{picks[i] ? [picks[i]!.name, ...picks[i]!.mods].join(' · ') : s.includedOptions ? (L === 'es' ? `${s.includedOptions} ingrediente incluido` : `${s.includedOptions} topping included`) : ''}</span></span>
+							<span class="txt"><span class="l1">{s.label}</span><span class="l2">{picks[i] ? [picks[i]!.name, ...picks[i]!.mods].join(' · ') : s.included_options ? T('included', { n: s.included_options }) : ''}</span></span>
 							{#if picks[i]}<span class="change">{T('change')}</span>{/if}
 						</button>
 					</li>
@@ -99,12 +100,15 @@
 			</ol>
 			<div class="card picker">
 				{#if choosing}
-					<ItemConfigurator item={choosing} groups={data.groups} lang={L} freeOptions={data.slots[step].includedOptions ?? 0} allowedSizes={data.slots[step].eligible.sizes} submitLabel={filled + 1 >= data.slots.length && !picks[step] ? T('addDeal') : T('next')} onsubmit={onpick} onclose={() => (choosing = null)} />
-				{:else}
-					<div class="pick-head"><span class="eyebrow">{T('nowPicking')}</span><h2>{tr(data.slots[step], 'label', L)}</h2></div>
+					<ItemConfigurator item={choosing} menu={S.menu} {ctx} lang={L} allowedSizes={slots[step].eligible.sizes} showQty={false} submitLabel={filled + 1 >= slots.length && !picks[step] ? T('addDeal') : T('next')} onsubmit={onpick} onclose={() => (choosing = null)} />
+				{:else if slots[step]}
+					<div class="pick-head"><span class="eyebrow">{T('nowPicking')}</span><h2>{slots[step].label}</h2></div>
 					<ul class="choices">
-						{#each data.slots[step].items as i (i.id)}
-							<li><button type="button" class="choice" onclick={() => choose(i)} disabled={data.live.soldOut.includes(i.id)}><span class="nm">{tr(i, 'name', L)}</span><span class="muted num">{data.live.soldOut.includes(i.id) ? T('soldOut') : (L === 'es' ? 'normal ' : 'usually ') + fromLabel(i, data.slots[step].eligible.sizes)}</span><Icon name="right" size={18} /></button></li>
+						{#each slots[step].items as i (i.id)}
+							{@const out = i.sold_out || soldOut.includes(i.id)}
+							<li><button type="button" class="choice" onclick={() => (choosing = i)} disabled={out}><span class="nm">{i.name}</span><span class="muted num">{out ? T('soldOut') : `${T('usually')} ${money(fromPrice(i))}`}</span><Icon name="right" size={18} /></button></li>
+						{:else}
+							<li class="muted">{T('nothingFits')}</li>
 						{/each}
 					</ul>
 				{/if}
@@ -113,11 +117,17 @@
 	{/if}
 {:else}
 	<div class="pad auto-deal">
-		<p class="lead">{tr(D, 'desc', L)}</p>
-		<p class="muted">{L === 'es' ? 'Se aplica sola en el carrito. Estos cuentan:' : 'It applies by itself in your cart. These count:'}</p>
-		<ul class="choices">
-			{#each data.extra as i (i.id)}<li><a class="choice" href="{b}/menu/{i.slug}"><span class="nm">{tr(i, 'name', L)}</span><span class="muted num">{money(fromPrice(i))}</span><Icon name="right" size={18} /></a></li>{/each}
-		</ul>
+		{#if D.description}<p class="lead">{D.description}</p>{/if}
+		{#if D.kind === 'code' && D.code}
+			<div class="banner info"><Icon name="tag" size={18} /><span class="grow">{T('useCode', { c: D.code })}{#if D.min_subtotal_cents} · {T('minSubtotal', { m: money(D.min_subtotal_cents) })}{/if}</span></div>
+		{:else}
+			<p class="muted">{T('appliesItself')}</p>
+		{/if}
+		{#if counts.length}
+			<ul class="choices">
+				{#each counts as i (i.id)}<li><a class="choice" href="{b}/menu/{i.slug}"><span class="nm">{i.name}</span><span class="muted num">{money(fromPrice(i))}</span><Icon name="right" size={18} /></a></li>{/each}
+			</ul>
+		{/if}
 	</div>
 {/if}
 

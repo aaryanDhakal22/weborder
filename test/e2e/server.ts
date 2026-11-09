@@ -1,15 +1,10 @@
-// Starts the production build on a free port with a throwaway data folder, and makes requests
-// with any Host header (store hosts, the admin host, unknown hosts) over node:http.
+// Starts the production build on a free port against a main, and makes requests with any Host
+// header (store hosts, unknown hosts) over node:http.
 import { spawn, type ChildProcess } from 'node:child_process';
 import http from 'node:http';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { createServer } from 'node:net';
 
-export const ADMIN_PASSWORD = 'e2e-pass';
-
-async function freePort(): Promise<number> {
+export async function freePort(): Promise<number> {
 	return new Promise((resolve) => {
 		const s = createServer().listen(0, () => {
 			const p = (s.address() as { port: number }).port;
@@ -28,15 +23,13 @@ export interface Res {
 
 export class TestServer {
 	port = 0;
-	dataDir = '';
 	private proc?: ChildProcess;
 
-	async start() {
+	async start(env: Record<string, string>) {
 		this.port = await freePort();
-		this.dataDir = mkdtempSync(join(tmpdir(), 'quicc-e2e-'));
 		this.proc = spawn(process.execPath, ['build'], {
 			cwd: new URL('../..', import.meta.url).pathname,
-			env: { ...process.env, PORT: String(this.port), DATA_DIR: this.dataDir, BASE_DOMAIN: 'localhost', ADMIN_HOST: 'admin.localhost', ADMIN_PASSWORD, SECRET: 'e2e-secret', DEMO_FLOOR: 'fast' },
+			env: { ...process.env, PORT: String(this.port), REFRESH_SECONDS: '5', ...env },
 			stdio: ['ignore', 'ignore', 'inherit']
 		});
 		for (let i = 0; i < 100; i++) {
@@ -52,7 +45,6 @@ export class TestServer {
 
 	stop() {
 		this.proc?.kill();
-		rmSync(this.dataDir, { recursive: true, force: true });
 	}
 
 	req(host: string, path: string, opts: { method?: string; body?: unknown; headers?: Record<string, string> } = {}): Promise<Res> {

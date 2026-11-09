@@ -1,12 +1,12 @@
 // Page weight and response time for every store's main pages → reports/perf.md.
-// Run against a production server with published stores: PERF_PORT=3100 npm run perf
+// Run against a running production build: PERF_PORT=5180 STORE_HOST=lombardis.localhost npm run perf
 import http from 'node:http';
 import { gzipSync, brotliCompressSync } from 'node:zlib';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { Browser } from './cdp.ts';
 
 const port = Number(process.env.PERF_PORT ?? 3000);
-const STORES: Record<string, string[]> = { lombardis: ['/', '/menu', '/menu/build-your-own-pizza', '/deals', '/checkout'], fern: ['/', '/menu'], lumbre: ['/', '/menu'] };
+const STORES: Record<string, string[]> = { [(process.env.STORE_HOST ?? 'lombardis.localhost').split('.')[0]]: ['/', '/menu', '/deals', '/checkout', '/contact'] };
 
 function get(host: string, path: string, headers: Record<string, string> = {}): Promise<{ ms: number; body: Buffer; headers: http.IncomingHttpHeaders; status: number }> {
 	const t0 = performance.now();

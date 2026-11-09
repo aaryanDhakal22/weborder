@@ -1,28 +1,17 @@
-// Runtime configuration from the environment. Every value has a dev default so `npm run dev` just works.
+// Runtime configuration from the environment. The storefront serves every store from one server:
+// it signs in to main with one platform key and names the host it is serving on each call.
 import { env } from '$env/dynamic/private';
-import { randomBytes } from 'node:crypto';
-import { resolve } from 'node:path';
 
 export const cfg = {
-	/** Where the mock data source and published snapshots live. */
-	dataDir: resolve(env.DATA_DIR || 'data'),
-	/** Stores answer on <slug>.<baseDomain>; quiccpos.com in production. */
-	baseDomain: (env.BASE_DOMAIN || 'localhost').toLowerCase(),
-	adminHost: (env.ADMIN_HOST || 'admin.localhost').toLowerCase(),
-	adminPassword: env.ADMIN_PASSWORD || 'quicc-dev',
-	/** Signs admin sessions, preview links and the publisher's render requests. */
-	secret: env.SECRET || randomBytes(32).toString('hex'),
-	/** 'mock' (file-backed, this repo) or 'main' (quicc main's /site/v1 API). */
-	source: (env.DATA_SOURCE || 'mock') as 'mock' | 'main',
-	mainUrl: env.MAIN_URL || 'http://localhost:1323',
-	mainKey: env.MAIN_SITE_KEY || '',
-	/** Serve published snapshots before rendering ('off' to always render). */
-	snapshots: env.SNAPSHOTS !== 'off',
-	/** Order tracking stages advance in seconds ('fast', for demos) or minutes ('real'). */
-	floor: (env.DEMO_FLOOR || 'fast') as 'fast' | 'real',
-	/** Publisher renders pages by calling this server; defaults to the request's own port. */
-	renderOrigin: env.RENDER_ORIGIN || '',
-	/** Dev/demo only: "host:port=store-host,…" lets one machine name serve each store on its own port. */
+	/** main's base URL (dev http://localhost:1323, staging http://192.168.1.221:1323). */
+	mainUrl: (env.MAIN_URL || 'http://localhost:1323').replace(/\/+$/, ''),
+	/** The storefront's platform key (qpk_…), minted in main's admin (Platform keys). */
+	platformKey: env.PLATFORM_KEY || '',
+	/** How often a store's menu version, website settings and payments are re-checked (seconds). */
+	refreshS: Math.max(5, Number(env.REFRESH_SECONDS || 30)),
+	/** Behind a proxy that sets X-Forwarded-For / -Host (Caddy, Traefik). */
+	trustProxy: env.TRUST_PROXY === '1' || env.TRUST_PROXY === 'true',
+	/** Dev / LAN staging: "name:port=store-host,…" serves each store on its own port of one machine. */
 	hostAliases: new Map(
 		(env.HOST_ALIASES || '')
 			.split(',')
@@ -31,4 +20,5 @@ export const cfg = {
 	)
 };
 
+/** Subdomains of a platform domain that never resolve to a store. */
 export const RESERVED = new Set(['www', 'main', 'staging', 'staging-main', 'ingest', 'utility', 'otlp', 'metrics', 'callcenter', 'order', 'api', 'app', 'admin', 'content', 'stores', 'mail']);

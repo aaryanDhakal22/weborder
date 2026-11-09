@@ -1,14 +1,11 @@
-import { dealLive } from '$lib/pricing';
 import { cityLine, dealLd, ldJson } from '$lib/server/seo';
 
 export const load = async ({ locals, parent }) => {
 	const store = locals.store!;
-	const { lang, origin } = await parent();
-	const now = new Date();
-	const deals = store.deals.filter((d) => d.active).map((d) => ({ ...d, live: dealLive(d, store.timezone, now) }));
+	const { origin, lang } = await parent();
+	const city = cityLine(store);
 	return {
-		deals,
-		title: `Deals · ${store.name}, ${cityLine(store)}`,
-		ld: ldJson(deals.map((d) => dealLd(store, d, origin, lang)))
+		title: `${lang === 'es' ? 'Ofertas' : 'Deals'} · ${store.name}${city ? `, ${city}` : ''}`,
+		ld: ldJson(store.deals.map((d) => dealLd(d, origin)))
 	};
 };

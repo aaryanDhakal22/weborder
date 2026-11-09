@@ -1,0 +1,19 @@
+# Staging (weborder stage 4): the storefront in a container on 192.168.1.221 next to staging main,
+# LAN only until staging main has a public HTTPS address (WEBORDER-PLAN.md, pinned items).
+# Run under Doppler (project weborder, config stg — the owner sets PLATFORM_KEY):
+#   doppler run -- docker compose -f deploy/compose.staging.yml up -d --build
+# Open http://192.168.1.221:3100 — HOST_ALIASES maps that address to the store's host, which must be
+# a verified host of the store in main (admin: Locations → site domains).
+services:
+  storefront:
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    image: quicc-storefront:staging
+    container_name: quicc-storefront
+    restart: unless-stopped
+    environment:
+      MAIN_URL: ${MAIN_URL:-http://192.168.1.221:1323}
+      PLATFORM_KEY: ${PLATFORM_KEY:?set PLATFORM_KEY (a qpk_ key from main's admin)}
+      HOST_ALIASES: ${HOST_ALIASES:-192.168.1.221:3100=lombardis.staging.quiccpos.com}
+      REFRESH_SECONDS: ${REFRESH_SECONDS:-30}
+    ports:
+      - "3100:3000"

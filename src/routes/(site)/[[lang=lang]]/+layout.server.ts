@@ -2,30 +2,28 @@ import { error } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import type { Lang } from '$lib/types';
 import { buildTheme } from '$lib/theme';
-import { liveState } from '$lib/live';
-import { primaryHost, toPublic } from '$lib/server/tenancy';
+import { statusFor } from '$lib/server/store';
 import { ldJson, restaurantLd } from '$lib/server/seo';
 
-export const load = async ({ locals, params, url }) => {
+// Runs once per full page load: client-side navigation keeps this data (it never reads the URL path),
+// so the menu crosses the wire once per visit.
+export const load = async ({ locals, params, url, untrack }) => {
 	const store = locals.store;
 	if (!store) error(404, 'Not found');
-	const langs = store.site.languages;
+	const langs = store.look.languages;
 	if (params.lang && (params.lang === langs[0] || !langs.includes(params.lang as Lang))) error(404, 'Not found');
 	const lang = (params.lang ?? langs[0]) as Lang;
 	const base = params.lang ? `/${params.lang}` : '';
-	const ov = locals.previewOverrides;
-	const theme = buildTheme(ov?.preset ?? store.site.preset, ov?.brand ?? store.site.brand);
-	const origin = dev ? url.origin : `https://${primaryHost(store)}`;
-	const rest = base ? url.pathname.slice(base.length) || '/' : url.pathname;
+	const theme = buildTheme(store.look.preset, store.look.brand);
+	const origin = dev ? untrack(() => url.origin) : `https://${store.host}`;
+	const status = await statusFor(locals.host);
 	return {
-		store: toPublic(store),
+		store,
+		status,
 		lang,
 		langs,
 		base,
 		origin,
-		rest,
-		live: liveState(store),
-		banner: locals.preview && !locals.render ? (store.status === 'draft' ? 'draft' : 'preview') : null,
 		theme: {
 			css: theme.css,
 			fontFaces: theme.fontFaces,
@@ -35,6 +33,6 @@ export const load = async ({ locals, params, url }) => {
 			mode: theme.preset.mode,
 			preset: theme.preset.id
 		},
-		restaurantLd: ldJson(restaurantLd(store, origin, lang))
+		restaurantLd: ldJson(restaurantLd(store, status, origin))
 	};
 };
