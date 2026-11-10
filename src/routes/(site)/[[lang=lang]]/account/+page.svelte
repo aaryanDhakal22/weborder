@@ -8,10 +8,10 @@
 	import loadingArt from '$lib/miso/art/miso-loading.svg?raw';
 	import noOrdersArt from '$lib/miso/art/miso-no-orders.svg?raw';
 	import { account, api } from '$lib/account.svelte';
-	import { cart } from '$lib/cart.svelte';
+	import { reorder as reorderOrder } from '$lib/reorder';
 	import { t } from '$lib/i18n';
 	import { money, fmtPhone, dayLabel, clock } from '$lib/fmt';
-	import type { Account, Address, CartEntry, PastOrder, Quote } from '$lib/types';
+	import type { Account, Address, PastOrder } from '$lib/types';
 
 	let { data } = $props();
 	const S = $derived(data.store);
@@ -127,19 +127,12 @@
 	async function reorder(o: PastOrder) {
 		err = '';
 		try {
-			const r = await api<{ lines: CartEntry['line'][]; dropped: string[]; quote: Quote | null }>('POST', `/api/account/orders/${o.id}/reorder`);
-			if (!r.lines.length) {
-				dropped = r.dropped;
+			const r = await reorderOrder(o);
+			dropped = r.dropped;
+			if (!r.ok) {
 				err = T('reorderNothing');
 				return;
 			}
-			const entries: CartEntry[] = r.lines.map((line, i) => {
-				const q = r.quote?.lines.find((x) => x.index === i);
-				return { line, name: q?.name ?? '', mods: q?.mods ?? [], unitCents: q?.unit_cents ?? 0 };
-			});
-			cart.replace(entries);
-			cart.setFulfil(o.type);
-			dropped = r.dropped;
 			if (!dropped.length) await goto(`${b}/cart`);
 		} catch (e) {
 			err = (e as { message: string }).message;

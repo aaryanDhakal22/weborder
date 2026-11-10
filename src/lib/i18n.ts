@@ -60,7 +60,11 @@ const en = {
 	makeDefault: 'Use this address by default', noCards: 'Cards you save at checkout show up here.', forget: 'Forget', forgetCardQ: 'Forget this card?',
 	signOut: 'Sign out', deleteAccount: 'Delete my account', deleteQ: 'Delete your account, saved addresses and cards? Past orders stay with the store.',
 	// errors
-	lostTitle: 'Miso got lost in the menu', lostSub: "That page doesn't exist. The menu does, though.", backMenu: 'Back to the menu', minutes: 'min'
+	lostTitle: 'Miso got lost in the menu', lostSub: "That page doesn't exist. The menu does, though.", backMenu: 'Back to the menu', minutes: 'min',
+	// Store › Website: preview, blocks, privacy
+	previewBar: 'Preview of your draft · only you can see this until you publish', privacy: 'Privacy',
+	orderAgain: 'Order again', categories: 'What are you in the mood for?', getApp: 'Get the app', getAppSub: 'Free, no app store: tap Share, then Add to Home Screen.',
+	privacyTitle: 'Privacy policy'
 };
 
 type Dict = typeof en;
@@ -115,7 +119,10 @@ const es: Dict = {
 	reorderDropped: 'Ya no está en el menú: {x}. Lo demás está en tu carrito.', default: 'Principal', noAddresses: 'Aún no hay direcciones guardadas.', label: 'Nombre', labelPh: 'Casa, Trabajo…',
 	makeDefault: 'Usar esta dirección por defecto', noCards: 'Las tarjetas que guardes al pagar aparecen aquí.', forget: 'Olvidar', forgetCardQ: '¿Olvidar esta tarjeta?',
 	signOut: 'Salir', deleteAccount: 'Borrar mi cuenta', deleteQ: '¿Borrar tu cuenta, direcciones y tarjetas? Los pedidos pasados se quedan con la tienda.',
-	lostTitle: 'Miso se perdió en el menú', lostSub: 'Esa página no existe. El menú sí.', backMenu: 'Volver al menú', minutes: 'min'
+	lostTitle: 'Miso se perdió en el menú', lostSub: 'Esa página no existe. El menú sí.', backMenu: 'Volver al menú', minutes: 'min',
+	previewBar: 'Vista previa del borrador · solo tú la ves hasta que publiques', privacy: 'Privacidad',
+	orderAgain: 'Pedir otra vez', categories: '¿Qué se te antoja?', getApp: 'Descarga la app', getAppSub: 'Gratis, sin tienda de apps: toca Compartir y luego Agregar a inicio.',
+	privacyTitle: 'Política de privacidad'
 };
 
 const DICTS: Record<Lang, Dict> = { en, es };

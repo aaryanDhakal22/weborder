@@ -64,6 +64,25 @@ one brand colour into ~35 tokens (OKLCH, with a WCAG AA contrast guard). The loo
 Website's published settings (`/channel/v1/site`), over the default: theme zero (Quibase, Barlow)
 in Lombardi's red (`src/lib/look.ts`).
 
+## Store › Website
+
+main's Website page edits the settings document `src/lib/look.ts` reads (`lookFrom` fills every
+missing or malformed field with its default; main checks the same fields in `domain/site/look.go`):
+- **look:** preset, brand, `menu_layout` (overrides the preset's), Spanish on/off (`languages`);
+- **images:** `logo` (the header, the app icon, the manifest) and `cover` (behind the hero and About
+  us), served at `/media/<id>` from `/channel/v1/site/images/<id>` and cached for good;
+- **home page:** `blocks` in order, each on or off: hero, order again (signed-in customers with past
+  orders), categories, deals (hides itself), from the menu (`picks`, else a sampler), hours, about
+  us, install the app;
+- **texts:** with their `_es` twins; an empty Spanish field gets our Spanish text, never the English;
+- **the rest:** the `announcement` bar (store-local dates), Miso's switches, and `privacy` (empty =
+  the default text from the store's details, at `/privacy`).
+
+**Preview:** `/p/<token>/…` is the same site with the store's draft. `src/hooks.ts` reroutes the
+path, and `hooks.server.ts` swaps in the draft look through `previewOf`, which is never cached.
+Every link keeps the prefix through `data.base` (`locals.root`). The Website page frames it
+(`frame-ancestors *`, noindex). A stale token gets a 303 to the same page without the prefix.
+
 ## Miso (`src/lib/miso/`)
 
 The cat chef is the illustrator's 19 animated SVGs (`src/lib/miso/art/`, kept byte for byte; the

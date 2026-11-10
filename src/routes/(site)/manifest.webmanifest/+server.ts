@@ -17,10 +17,13 @@ export const GET = async ({ locals }) => {
 		background_color: theme.palette.canvas,
 		theme_color: theme.palette.canvas,
 		lang: store.look.languages[0],
-		icons: [
-			{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-			{ src: '/icon.svg?maskable', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' }
-		]
+		// The store's logo (Store › Website, 512 × 512) is its app icon; else one drawn from its initials.
+		icons: store.look.logo
+			? [{ src: `/media/${store.look.logo}`, sizes: '512x512', purpose: 'any' }, { src: '/icon.svg?maskable', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' }]
+			: [
+					{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+					{ src: '/icon.svg?maskable', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' }
+				]
 	};
 	return new Response(JSON.stringify(manifest), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'public, max-age=3600' } });
 };

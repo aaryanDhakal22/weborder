@@ -24,9 +24,26 @@ interface Entry {
 
 const cache = new Map<string, Entry>();
 
-/** A sampler for the home page: the first item of each of the first categories (no popularity claims until main has order counts). */
-function popularOf(menu: Menu): string[] {
+/** "From the menu": the store's picks (Store › Website, up to 8, ones still on the menu), else a sampler: the
+ *  first item of each of the first categories (no popularity claims until main has order counts). */
+export function picksOf(menu: Menu, picks: string[]): string[] {
+	const on = new Set(menu.categories.flatMap((c) => c.items.map((i) => i.id)));
+	const mine = picks.filter((id) => on.has(id));
+	if (mine.length) return mine;
 	return menu.categories.slice(0, 6).flatMap((c) => c.items.filter((i) => !i.sold_out).slice(0, 1).map((i) => i.id));
+}
+
+/** The store with its draft look, for the preview link (never cached: the store is editing it).
+ *  null = the token is stale (the page drops the prefix). */
+export async function previewOf(host: string, view: StoreView, token: string): Promise<StoreView | null> {
+	try {
+		const site = await get<Site>(host, `/channel/v1/site?preview=${encodeURIComponent(token)}`);
+		const look = lookFrom(site.settings);
+		return { ...view, look, preview: true, popular: picksOf(view.menu, look.picks) };
+	} catch (err) {
+		if (err instanceof MainError && (err.code === 'bad_preview' || err.status === 403)) return null;
+		throw err;
+	}
 }
 
 async function build(host: string, e: Entry): Promise<void> {
@@ -48,11 +65,12 @@ async function build(host: string, e: Entry): Promise<void> {
 		address: { line1: status.store.address_line1, line2: status.store.address_line2 },
 		look: lookFrom(site.settings),
 		host: site.primary_host || host,
+		email: site.email ?? '',
 		menu: shaped,
 		pricing: ctx as Omit<Context, 'menu'>,
 		payments,
 		deals: (pricing.deals ?? []).filter((d) => d.active),
-		popular: popularOf(shaped)
+		popular: picksOf(shaped, lookFrom(site.settings).picks)
 	};
 	e.status = status;
 	e.statusAt = Date.now();

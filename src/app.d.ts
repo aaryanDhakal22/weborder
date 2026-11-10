@@ -11,6 +11,8 @@ declare global {
 			ip: string;
 			/** The customer's session (qcs_…) from the host-only cookie, if signed in. */
 			session: string | null;
+			/** "/p/<token>" on Store › Website's private preview link ("" otherwise): every link keeps it */
+			root: string;
 		}
 		interface PageState {
 			sheet?: string;

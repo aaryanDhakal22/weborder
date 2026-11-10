@@ -103,6 +103,10 @@ export interface Site {
 	primary_host: string;
 	hosts: string[];
 	settings: Record<string, unknown>;
+	/** the draft's settings (asked with a preview token) */
+	preview?: boolean;
+	/** the store's contact email ("" = none) */
+	email: string;
 }
 
 export interface Me {
@@ -110,23 +114,52 @@ export interface Me {
 	store: { tenant_id: string; location_id: string; name: string; timezone: string };
 }
 
-// ------------------------------------------------------------------ the look (Store › Website, later)
+// ------------------------------------------------------------------ the look (Store › Website)
 
 export type MisoSpot = 'peek' | 'side' | 'off';
+export type MenuLayout = 'compact' | 'photo' | 'printed';
+/** The home page's blocks (Store › Website › Home page). */
+export type BlockId = 'hero' | 'again' | 'categories' | 'deals' | 'picks' | 'hours' | 'about' | 'install';
 
-/** The store's website look: Store › Website's published settings over the defaults. */
+/** The store's words; each `_es` twin is the Spanish text ("" = the storefront's own). */
+export interface Texts {
+	eyebrow: string;
+	headline: string;
+	lead: string;
+	about_title: string;
+	about: string;
+	eyebrow_es: string;
+	headline_es: string;
+	lead_es: string;
+	about_title_es: string;
+	about_es: string;
+}
+
+/** The store's website look: Store › Website's published settings (or, in a preview, the draft) over the defaults. */
 export interface Look {
 	preset: string;
 	brand: string;
+	/** null = the preset's own */
+	menuLayout: MenuLayout | null;
+	languages: Lang[];
+	/** site image ids ("" = none), served at /media/{id} */
+	logo: string;
+	cover: string;
+	texts: Texts;
+	/** every block, in the store's order */
+	blocks: { id: BlockId; on: boolean }[];
+	/** "From the menu": item ids ([] = the first item of each category) */
+	picks: string[];
+	announcement: { on: boolean; text: string; text_es: string; from: string; to: string };
 	/** Miso's optional places (the status/process scenes always show): */
 	miso: {
 		/** cart, checkout, sign-in and the empty pages (no deals, no orders) */
 		pages: boolean;
 		/** per Home page block: Miso peeking over it, sitting beside it, or none */
-		blocks: Record<string, MisoSpot>;
+		blocks: Partial<Record<BlockId, MisoSpot>>;
 	};
-	languages: Lang[];
-	texts: { eyebrow?: string; headline?: string; lead?: string; tagline?: string };
+	/** the privacy policy ("" = the default text) */
+	privacy: string;
 }
 
 // ------------------------------------------------------------------ orders + tracking
@@ -193,6 +226,10 @@ export interface StoreView {
 	address: { line1: string; line2: string };
 	look: Look;
 	host: string;
+	/** the store's contact email (the privacy page; "" = none) */
+	email: string;
+	/** rendered from a draft (Store › Website's private preview link) */
+	preview?: boolean;
 	menu: Menu;
 	/** main's pricing context for in-browser previews, without the menu (main re-prices every quote and order). */
 	pricing: Omit<Context, 'menu'>;

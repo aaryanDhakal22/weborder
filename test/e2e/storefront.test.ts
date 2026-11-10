@@ -161,6 +161,48 @@ describe('storefront on main', { skip: up ? false : `main isn't reachable at ${M
 		assert.ok(['open', 'closed', 'paused'].includes(s.state));
 		assert.equal(s.week.length, 7);
 	});
+
+	test("Store › Website: the preview link shows the draft, keeps its prefix, never leaks; logo through /media; privacy page", async () => {
+		// a logo (SVG) and a draft with a headline + an announcement
+		const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#E2363B"/></svg>';
+		const up = await fetch(`${MAIN}/store/v1/me/site/images?kind=logo`, { method: 'POST', headers: { cookie: a.cookie, 'content-type': 'image/svg+xml' }, body: svg });
+		assert.equal(up.status, 201);
+		const logo = (await up.json()).id as string;
+		await a.me('PUT', '/site/website/draft', { logo, texts: { headline: `Draft headline ${a.tag}` }, announcement: { on: true, text: 'Closed Thanksgiving' }, blocks: [{ id: 'about', on: true }], miso_pages: false }, 200);
+		const w = (await a.me('GET', '/site/website', undefined, 200)).data;
+		const root = new URL(w.preview_url).pathname;
+		assert.match(root, /^\/p\/qpv_[0-9a-f]+$/);
+
+		const pv = await srv.req(a.host, root);
+		assert.equal(pv.status, 200);
+		assert.ok(pv.body.includes(`Draft headline ${a.tag}`) && pv.body.includes('Closed Thanksgiving'));
+		assert.ok(pv.body.includes(`href="${root}/menu"`), 'links keep the preview prefix');
+		assert.ok(pv.body.includes(`/media/${logo}`));
+		assert.equal(pv.headers['content-security-policy'], 'frame-ancestors *');
+		assert.equal(pv.headers['x-robots-tag'], 'noindex');
+		assert.equal((await srv.req(a.host, `${root}/menu`)).status, 200);
+		// the published site and the other store never see the draft
+		const live = await srv.req(a.host, '/');
+		assert.ok(!live.body.includes(`Draft headline ${a.tag}`) && live.headers['x-frame-options'] === 'SAMEORIGIN');
+		const other = await srv.req(b.host, root);
+		assert.equal(other.status, 303);
+		// a stale link drops the prefix
+		const stale = await srv.req(a.host, '/p/qpv_0000000000000000/menu');
+		assert.equal(stale.status, 303);
+		assert.equal(stale.headers.location, '/menu');
+
+		const img = await srv.req(a.host, `/media/${logo}`);
+		assert.equal(img.status, 200);
+		assert.equal(img.headers['content-type'], 'image/svg+xml');
+		assert.match(String(img.headers['cache-control']), /immutable/);
+		assert.match(String(img.headers['content-security-policy']), /sandbox/);
+		assert.equal((await srv.req(b.host, `/media/${logo}`)).status, 404);
+
+		const pr = await srv.req(a.host, '/privacy');
+		assert.equal(pr.status, 200);
+		assert.ok(pr.body.includes('card numbers go straight to Square') || pr.body.includes('Cards: card numbers'));
+		await a.me('DELETE', '/site/website/draft', undefined, 200);
+	});
 });
 
 function firstEvent(port: number, host: string, path: string): Promise<{ event: string; data: string }> {

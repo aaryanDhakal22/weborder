@@ -26,7 +26,8 @@
 	const hideCartbar = $derived(['cart', 'checkout', 'order', 'account'].includes(active) || (active === 'deals' && path.split('/').length > 2));
 	const otherLangs = $derived(data.langs.filter((l: string) => l !== L));
 	const rest = $derived(b ? page.url.pathname.slice(b.length) || '/' : page.url.pathname);
-	const langHref = (l: string) => (l === data.langs[0] ? '' : `/${l}`) + (rest === '/' && l !== data.langs[0] ? '' : rest);
+	const langHref = (l: string) => data.root + (l === data.langs[0] ? '' : `/${l}`) + (rest === '/' && l !== data.langs[0] ? '' : rest);
+	const logo = $derived(S.look.logo ? `/media/${S.look.logo}` : '');
 
 	async function refresh() {
 		try {
@@ -62,8 +63,8 @@
 	{@html `<style>${data.theme.fontFaces}${data.theme.css}</style>`}
 	<meta name="theme-color" content={data.theme.themeColor} />
 	<link rel="manifest" href="/manifest.webmanifest" />
-	<link rel="icon" href="/icon.svg" type="image/svg+xml" />
-	<link rel="apple-touch-icon" href="/icon.svg" />
+	<link rel="icon" href={logo || '/icon.svg'} />
+	<link rel="apple-touch-icon" href={logo || '/icon.svg'} />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-title" content={S.name} />
 	<meta property="og:site_name" content={S.name} />
@@ -76,8 +77,10 @@
 
 <div class="sf nav-{nav} {nav === 'bottom' ? 'has-tabbar' : 'has-cartbar'} theme-{data.theme.preset}">
 	<a class="sr" href="#main">{T('skip')}</a>
+	{#if S.preview}<div class="preview-bar" role="status">{T('previewBar')}</div>{/if}
+	{#if data.announcement}<div class="announce pad" role="note">{data.announcement}</div>{/if}
 	<header class="top pad">
-		<a class="brandbox" href={b || '/'} aria-label="{S.name} — {T('home')}"><span class="wordmark">{S.name}</span></a>
+		<a class="brandbox" href={b || '/'} aria-label="{S.name} — {T('home')}">{#if logo}<img class="logo" src={logo} alt={S.name} />{:else}<span class="wordmark">{S.name}</span>{/if}</a>
 		<nav class="links" aria-label={T('mainNav')}>
 			<a class:on={active === 'home'} href={b || '/'}>{T('home')}</a>
 			<a class:on={active === 'menu'} href="{b}/menu">{T('menu')}</a>
@@ -113,7 +116,7 @@
 	<div class="shell">
 		{#if nav === 'side'}
 			<aside class="side">
-				<div class="side-brand"><span class="wordmark" style="font-size:30px">{S.name}</span></div>
+				<div class="side-brand">{#if logo}<img class="logo big" src={logo} alt={S.name} />{:else}<span class="wordmark" style="font-size:30px">{S.name}</span>{/if}</div>
 				<nav class="navlist" aria-label={T('mainNav')}>
 					<a class:on={active === 'home'} href={b || '/'}><Icon name="home" size={18} />{T('home')}</a>
 					<a class:on={active === 'menu'} href="{b}/menu"><Icon name="list" size={18} />{T('menu')}</a>
@@ -136,6 +139,7 @@
 			{@render children()}
 			<footer class="foot pad">
 				<span>{[S.address.line1, S.address.line2].filter(Boolean).join(', ')}{#if S.phone} · <a href={telHref(S.phone)}>{fmtPhone(S.phone)}</a>{/if}</span>
+				<a href="{b}/privacy">{T('privacy')}</a>
 				<a class="byq" href="https://quiccpos.com" rel="noopener"><i>q</i> {T('poweredBy')}</a>
 			</footer>
 			<div class="body-end"></div>
@@ -158,6 +162,10 @@
 
 <style>
 	.hdr-fulfil { display: none; }
+	.logo { display: block; height: 44px; width: auto; max-width: 180px; object-fit: contain; }
+	.logo.big { height: 72px; max-width: 200px; }
+	.announce { padding-top: 9px; padding-bottom: 9px; background: var(--q-brand); color: var(--q-on-brand); font-weight: 600; font-size: 14px; text-align: center; }
+	.preview-bar { position: sticky; top: 0; z-index: 20; padding: 6px 12px; background: #ac94f4; color: #241b47; font: 700 13px/1.3 var(--q-font-body); text-align: center; }
 	@media (min-width: 1100px) { .hdr-fulfil { display: inline-flex; } }
 	.statusbar { padding-top: 10px; padding-bottom: 10px; font-weight: 600; font-size: 14px; border-bottom: var(--q-border-w) solid var(--q-border); }
 	.tone-warn { background: color-mix(in srgb, var(--q-warn) 18%, var(--q-canvas)); }

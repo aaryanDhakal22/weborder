@@ -2,7 +2,8 @@
 // unknown_site for a host no store is served on, so tenancy is main's decision, not ours.
 import type { Handle } from '@sveltejs/kit';
 import { clientIp, hopeless, requestHost } from '$lib/server/tenancy';
-import { storeFor } from '$lib/server/store';
+import { previewOf, storeFor } from '$lib/server/store';
+import { PREVIEW } from './hooks';
 import { COOKIE } from '$lib/server/session';
 
 const page = (title: string, body: string) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${title}</title>
@@ -29,14 +30,29 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (r.kind === 'unknown') return html(NOT_FOUND, 404);
 	if (r.kind === 'unavailable') return html(UNAVAILABLE, 503);
 	event.locals.store = r.view;
+	event.locals.root = '';
 
-	const seg = path.split('/')[1];
-	const langs = r.view.look.languages;
+	// Store › Website's preview link: the same pages with the draft look, framed by the Website page.
+	const pv = PREVIEW.exec(path);
+	if (pv) {
+		const draft = await previewOf(host, r.view, pv[1]).catch(() => null);
+		if (!draft) return new Response(null, { status: 303, headers: { location: path.slice(pv[0].length) || '/' } });
+		event.locals.store = draft;
+		event.locals.root = pv[0];
+	}
+	const rest = pv ? path.slice(pv[0].length) || '/' : path;
+
+	const seg = rest.split('/')[1];
+	const langs = event.locals.store.look.languages;
 	const lang = langs.slice(1).includes(seg as never) ? seg : langs[0];
 	const res = await resolve(event, { transformPageChunk: ({ html }) => html.replace('%lang%', lang) });
 	res.headers.set('x-content-type-options', 'nosniff');
 	res.headers.set('referrer-policy', 'strict-origin-when-cross-origin');
-	res.headers.set('x-frame-options', 'SAMEORIGIN');
+	if (pv) {
+		// The Website page frames the preview (the token is the secret); never indexed.
+		res.headers.set('content-security-policy', 'frame-ancestors *');
+		res.headers.set('x-robots-tag', 'noindex');
+	} else res.headers.set('x-frame-options', 'SAMEORIGIN');
 	if (!res.headers.has('cache-control')) res.headers.set('cache-control', 'private, no-store');
 	return res;
 };

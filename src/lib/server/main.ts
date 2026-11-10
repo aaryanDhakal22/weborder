@@ -65,6 +65,15 @@ export async function get<T>(host: string, path: string, o: CallOpts = {}): Prom
 	return r.data;
 }
 
+/** A GET whose answer isn't JSON (site images): main's Response as is. */
+export async function raw(host: string, path: string): Promise<Response> {
+	try {
+		return await fetch(cfg.mainUrl + path, { headers: { authorization: `Bearer ${cfg.platformKey}`, 'x-site-host': host }, signal: AbortSignal.timeout(8000) });
+	} catch (e) {
+		throw new MainError(503, 'main_unreachable', `main GET ${path}: ${(e as Error).message}`);
+	}
+}
+
 /** Opens a streaming GET (SSE) on main. */
 export function stream(host: string, path: string, signal: AbortSignal, lastEventId?: string): Promise<Response> {
 	const headers: Record<string, string> = { authorization: `Bearer ${cfg.platformKey}`, 'x-site-host': host, accept: 'text/event-stream' };
