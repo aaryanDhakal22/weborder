@@ -11,8 +11,11 @@ class Cart {
 	code = $state('');
 	bump = $state(0);
 	ready = $state(false);
-	/** One idempotency key per cart: kept across retries, new after an order is placed. */
+	/** One idempotency key per cart: kept across retries of an unanswered attempt (and 3-D Secure),
+	 * new after the cart changes, after an order is placed, and after any final refusal. */
 	clientOrderId = $state('');
+	/** A key main hasn't answered for yet (the outbox is on it): checkout shows "Still confirming". */
+	pending = $state('');
 
 	count = $derived(this.entries.reduce((s, e) => s + (e.line.qty ?? 1), 0));
 	subtotal = $derived(this.entries.reduce((s, e) => s + e.unitCents * (e.line.qty ?? 1), 0));
@@ -24,6 +27,7 @@ class Cart {
 				this.entries = raw.entries ?? [];
 				this.code = raw.code ?? '';
 				this.clientOrderId = raw.cid ?? '';
+				this.pending = raw.pend ?? '';
 				this.fulfil = allowed.includes(raw.fulfil) ? raw.fulfil : defaultFulfil;
 			} else this.fulfil = defaultFulfil;
 		} catch {
@@ -34,7 +38,7 @@ class Cart {
 	}
 	save() {
 		try {
-			localStorage.setItem(KEY, JSON.stringify({ entries: this.entries, fulfil: this.fulfil, code: this.code, cid: this.clientOrderId, at: Date.now() }));
+			localStorage.setItem(KEY, JSON.stringify({ entries: this.entries, fulfil: this.fulfil, code: this.code, cid: this.clientOrderId, pend: this.pending, at: Date.now() }));
 		} catch {
 			/* private mode: the cart still works for this visit */
 		}
@@ -61,6 +65,16 @@ class Cart {
 		this.entries = entries;
 		this.changed();
 	}
+	/** A final refusal ends the key: the next attempt is a new order. */
+	renewKey() {
+		this.clientOrderId = newId();
+		this.pending = '';
+		this.save();
+	}
+	setPending(key: string) {
+		this.pending = key;
+		this.save();
+	}
 	setFulfil(f: Fulfil) {
 		this.fulfil = f;
 		this.save();
@@ -72,6 +86,7 @@ class Cart {
 	clear() {
 		this.entries = [];
 		this.code = '';
+		this.pending = '';
 		this.changed();
 	}
 }

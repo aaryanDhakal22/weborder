@@ -52,6 +52,7 @@
 		if (offline || !live) return { tone: 'bad', text: T('offline') };
 		if (live.state === 'paused') return { tone: 'warn', text: live.pause?.until ? `${T('pausedBar')} · ${T('backAround', { t: clock(live.pause.until, S.timezone) })}` : T('pausedBar') };
 		if (live.state === 'closed') return { tone: 'info', text: live.next_open_at ? `${T('closed')} · ${whenOpens(live.next_open_at, S.timezone, L)}` : T('closed') };
+		if (live.kitchen_offline) return { tone: 'bad', text: T('kitchenOffline'), call: true };
 		return null;
 	});
 	const signedIn = $derived(!!account.me);
@@ -111,7 +112,7 @@
 		</div>
 	</header>
 	{#if status}
-		<div class="statusbar pad tone-{status.tone}" role="status">{status.text}{#if live?.pause?.note}{` · ${live.pause.note}`}{/if}</div>
+		<div class="statusbar pad tone-{status.tone}" role="status">{status.text}{#if live?.pause?.note}{` · ${live.pause.note}`}{/if}{#if status.call && S.phone}{' '}<a href={telHref(S.phone)}>{T('callStoreAt', { p: fmtPhone(S.phone) })}</a>{/if}</div>
 	{/if}
 	<div class="shell">
 		{#if nav === 'side'}

@@ -90,6 +90,8 @@ export interface StoreStatus {
 	scheduling: { days_ahead: number; slot_minutes: number };
 	sold_out: string[];
 	menu_version: number;
+	/** The store's Pi (its kitchen) can't get an order now: ASAP orders are refused (DURABILITY-PLAN.md). */
+	kitchen_offline?: boolean;
 }
 
 export interface Payments {

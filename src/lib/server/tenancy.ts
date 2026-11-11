@@ -31,3 +31,13 @@ export function clientIp(headers: Headers, fallback: () => string): string {
 		return '';
 	}
 }
+
+/** Did the customer's browser use https? Behind a trusted proxy (TLS ends at Caddy / Traefik) its
+ * X-Forwarded-Proto says; otherwise the request's own URL. Decides the Secure cookie flag and HSTS. */
+export function viaHttps(headers: Headers, url: URL): boolean {
+	if (cfg.trustProxy) {
+		const p = headers.get('x-forwarded-proto');
+		if (p) return p.split(',')[0].trim().toLowerCase() === 'https';
+	}
+	return url.protocol === 'https:';
+}

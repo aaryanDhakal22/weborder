@@ -13,7 +13,7 @@
 	import { cart } from '$lib/cart.svelte';
 	import { account } from '$lib/account.svelte';
 	import { t } from '$lib/i18n';
-	import { money, clock, dayLabel, localDate, fmtPhone } from '$lib/fmt';
+	import { money, clock, dayLabel, localDate, fmtPhone, telHref } from '$lib/fmt';
 	import { pct } from '$lib/engine';
 	import { cardMode, mountSquare, tokenize, verifyBuyer, TEST_TOKENS, type SquareForm } from '$lib/square';
 	import type { DeliveryCheck, PlacedOrder, Quote } from '$lib/types';
@@ -90,7 +90,9 @@
 	}
 
 	// --- when
-	let asap = $state(untrack(() => data.status?.accepting ?? true));
+	// the store's Pi can't get an order now: ASAP is refused by main (409 kitchen_offline); later is fine
+	const kitchenOff = $derived(!!st?.kitchen_offline);
+	let asap = $state(untrack(() => (data.status?.accepting ?? true) && !data.status?.kitchen_offline));
 	const days = $derived.by(() => {
 		const n = st?.scheduling.days_ahead ?? 0;
 		const out: { date: string; label: string }[] = [];
@@ -114,7 +116,9 @@
 		fetch(`/api/times?type=${type}&date=${d}`, { signal: ctl.signal })
 			.then((r) => (r.ok ? r.json() : { times: [] }))
 			.then((x) => {
-				times = x.times ?? [];
+				// the kitchen is offline: main takes only orders due an hour or more from now
+				const soonest = untrack(() => kitchenOff) ? Date.now() + 3600_000 : 0;
+				times = ((x.times ?? []) as string[]).filter((t) => Date.parse(t) >= soonest);
 				if (!times!.includes(slot)) slot = times![0] ?? '';
 			})
 			.catch(() => {});
@@ -186,13 +190,21 @@
 	});
 	onDestroy(() => form?.destroy());
 
-	// --- placing
+	// --- placing (DURABILITY-PLAN.md): the storefront writes the order down before sending it to main.
+	// main's final answer comes straight back; when main doesn't answer in time the outbox keeps going
+	// and the page shows "Still confirming" (cart.pending) until it knows. The key (cart.clientOrderId)
+	// stays for a retry of an unanswered attempt and for 3-D Secure, and is renewed after any final
+	// refusal (the next attempt is a new order).
 	let busy = $state(false);
 	let failure = $state<{ code: string; message: string } | null>(null);
+	/** The last attempt never reached an answer (the browser lost the connection): ask before sending again. */
+	let uncertain = false;
 	const phoneOk = $derived(phone.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '').length === 10);
 	const missing = $derived(
 		!name.trim() ? T('name') : !phoneOk ? T('phoneShort') : deliv && !address.line1 ? T('address') : deliv && !address.zip && !address.city ? T('zip') : !asap && !slot ? T('chooseTime') : ''
 	);
+	// the kitchen is offline: no ASAP; and with no scheduling at this store, no time at all
+	const asapBlocked = $derived(kitchenOff && (asap || (st?.scheduling.days_ahead ?? 0) === 0));
 
 	async function cardPayment(): Promise<{ method: 'card'; token?: string; card_id?: string; save_card?: boolean } | null> {
 		if (cardId) return { method: 'card', card_id: cardId };
@@ -222,9 +234,28 @@
 		await place(undefined, { method: 'card', token: r.token });
 	}
 
+	type KeyState = { state: 'pending' | 'placed' | 'refused' | 'expired' | 'voided' | 'verify'; order?: PlacedOrder; error?: { code: string; message: string } };
+	async function lookup(key: string): Promise<KeyState | null> {
+		const r = await fetch(`/api/orders/by-key/${encodeURIComponent(key)}`, { headers: { accept: 'application/json' } });
+		return r.ok ? r.json() : null;
+	}
+
+	async function placed(o: PlacedOrder) {
+		cart.clear();
+		await goto(`${b}/order/${o.track_token}`, { replaceState: true, state: { placed: true } });
+	}
+
+	/** A final "no": shown, and the key is done with. */
+	function refused(code: string, message: string) {
+		failure = { code, message: message || T('tryAgain') };
+		cart.renewKey();
+		if (code === 'store_closed' || code === 'store_paused' || code === 'kitchen_offline') asap = false;
+		document.getElementById('failure')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	}
+
 	async function place(e?: SubmitEvent, payment?: Record<string, unknown>) {
 		e?.preventDefault();
-		if (busy || quoting) return;
+		if (busy || quoting || asapBlocked) return;
 		failure = null;
 		if (missing) {
 			failure = { code: 'missing', message: T('fillIn', { f: missing }) };
@@ -232,6 +263,13 @@
 		}
 		busy = true;
 		try {
+			if (uncertain) {
+				// the last attempt may have gone through: never order twice
+				const k = await lookup(cart.clientOrderId).catch(() => null);
+				if (k?.state === 'placed' && k.order) return await placed(k.order);
+				if (k?.state === 'pending') return cart.setPending(cart.clientOrderId);
+				uncertain = false;
+			}
 			const p = payment ?? (pay === 'cash' ? { method: 'cash' } : await cardPayment());
 			if (!p) return;
 			const body = {
@@ -247,37 +285,70 @@
 				notes: notes.trim(),
 				expected_total_cents: quote?.total_cents ?? null
 			};
-			let r = await fetch('/api/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+			const send = (b: unknown) => fetch('/api/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) });
+			let r: Response;
+			try {
+				r = await send(body);
+			} catch {
+				uncertain = true;
+				throw new Error('network');
+			}
 			let res = await r.json();
 			if (r.status === 402 && res.code === 'verification_required' && form && typeof p.token === 'string') {
 				const v = await verifyBuyer(form, p.token, quote?.total_cents ?? 0, name, !!p.save_card).catch(() => null);
-				if (!v) {
-					failure = { code: 'payment_declined', message: T('verifyFailed') };
-					return;
+				if (!v) return refused('payment_declined', T('verifyFailed'));
+				try {
+					r = await send({ ...body, payment: { ...p, verification_token: v } }); // the same key
+				} catch {
+					uncertain = true;
+					throw new Error('network');
 				}
-				r = await fetch('/api/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...body, payment: { ...p, verification_token: v } }) });
 				res = await r.json();
 			}
-			if (r.ok) {
-				const o = res as PlacedOrder;
-				cart.clear();
-				await goto(`${b}/order/${o.track_token}`, { replaceState: true, state: { placed: true } });
-				return;
-			}
-			failure = { code: res.code ?? 'error', message: res.issues?.map((i: { message: string }) => i.message).join(' ') || res.error || T('tryAgain') };
-			if (res.code === 'store_closed' || res.code === 'store_paused') asap = false;
-			document.getElementById('failure')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			if (r.status === 200 || r.status === 201) return await placed(res as PlacedOrder);
+			if (r.status === 202) return cart.setPending(cart.clientOrderId); // main hasn't answered yet
+			refused(res.code ?? 'error', res.issues?.map((i: { message: string }) => i.message).join(' ') || res.error);
 		} catch {
 			failure = { code: 'network', message: T('offline') };
 		} finally {
 			busy = false;
 		}
 	}
+
+	// "Still confirming": ask the storefront (its outbox, else main) until there's an answer.
+	let notPlaced = $state<{ code: string; message: string } | null>(null);
+	$effect(() => {
+		const key = cart.pending;
+		if (!key) return;
+		let stop = false;
+		let unknown = 0;
+		const poll = async () => {
+			while (!stop) {
+				const k = await lookup(key).catch(() => undefined);
+				if (stop) return;
+				if (k?.state === 'placed' && k.order) return void (await placed(k.order));
+				if (k && k.state !== 'pending') {
+					notPlaced = { code: k.error?.code ?? k.state, message: k.state === 'verify' ? T('verifyFailed') : k.error?.message || '' };
+					cart.renewKey();
+					return;
+				}
+				if (k === null && ++unknown >= 6) {
+					// neither the storefront nor main knows this key: it never got anywhere
+					notPlaced = { code: 'expired', message: '' };
+					cart.renewKey();
+					return;
+				}
+				await new Promise((r) => setTimeout(r, 2500));
+			}
+		};
+		poll();
+		return () => (stop = true);
+	});
 	const failTitle = $derived(
-		!failure ? '' : failure.code === 'payment_declined' ? T('payFail') : failure.code === 'outside_area' ? T('zoneTitle') : failure.code === 'store_closed' ? T('closedTitle') : failure.code === 'store_paused' ? T('pausedTitle') : failure.code === 'price_changed' ? T('priceChanged') : T('checkThis')
+		!failure ? '' : failure.code === 'payment_declined' ? T('payFail') : failure.code === 'outside_area' ? T('zoneTitle') : failure.code === 'store_closed' ? T('closedTitle') : failure.code === 'store_paused' ? T('pausedTitle') : failure.code === 'kitchen_offline' ? T('kitchenOfflineTitle') : failure.code === 'price_changed' ? T('priceChanged') : failure.code === 'expired' || failure.code === 'voided' || failure.code === 'payment_canceled' ? T('notPlaced') : T('checkThis')
 	);
 	// errors always show Miso
-	const failArt = $derived(failure?.code === 'payment_declined' ? declinedArt : failure?.code === 'outside_area' ? outsideArt : failure?.code === 'store_paused' ? pausedArt : failure?.code === 'store_closed' ? closedArt : lostArt);
+	const failArt = $derived(failure?.code === 'payment_declined' ? declinedArt : failure?.code === 'outside_area' ? outsideArt : failure?.code === 'store_paused' || failure?.code === 'kitchen_offline' ? pausedArt : failure?.code === 'store_closed' ? closedArt : lostArt);
 </script>
 
 <svelte:head>
@@ -290,7 +361,21 @@
 	<h1>{T('checkout')}</h1>
 </div>
 
-{#if cart.ready && !cart.entries.length}
+{#if cart.ready && cart.pending}
+	<div class="state confirming" role="status" aria-live="polite">
+		<Miso art={loadingArt} size={160} decorative />
+		<h2>{T('stillConfirming')}</h2>
+		<p>{T('stillConfirmingSub')}</p>
+		{#if S.phone}<a class="btn btn-sm" href={telHref(S.phone)}>{T('callStoreAt', { p: fmtPhone(S.phone) })}</a>{/if}
+	</div>
+{:else if notPlaced}
+	<div class="state not-placed" role="alert">
+		<Miso art={lostArt} size={160} decorative />
+		<h2>{T('notPlaced')}</h2>
+		{#if notPlaced.message}<p>{notPlaced.message}</p>{/if}
+		<button type="button" class="btn btn-p btn-lg" onclick={() => (notPlaced = null)}>{T('backToCheckout')}</button>
+	</div>
+{:else if cart.ready && !cart.entries.length}
 	<div class="state">{#if S.look.miso.pages}<Miso art={emptyArt} size={160} decorative />{/if}<h2>{T('emptyCart')}</h2><p>{T('emptyCartSub')}</p><a class="btn btn-p btn-lg" href="{b}/menu">{T('browse')}</a></div>
 {:else}
 	<form class="pad co-grid" onsubmit={place} novalidate>
@@ -352,20 +437,22 @@
 			<section class="card co-sec">
 				<h2><span class="stepno">2</span>{T('when')}</h2>
 				<div class="seg full" role="radiogroup">
-					<button type="button" role="radio" aria-checked={asap} class:on={asap} disabled={!st?.accepting} onclick={() => (asap = true)}>{T('asap')}{#if st?.accepting}{' · '}<span class="num">~{deliv ? types.delivery.eta_minutes : types.pickup.eta_minutes} {T('minutes')}</span>{/if}</button>
+					<button type="button" role="radio" aria-checked={asap} class:on={asap} disabled={!st?.accepting || kitchenOff} onclick={() => (asap = true)}>{T('asap')}{#if st?.accepting && !kitchenOff}{' · '}<span class="num">~{deliv ? types.delivery.eta_minutes : types.pickup.eta_minutes} {T('minutes')}</span>{/if}</button>
 					{#if (st?.scheduling.days_ahead ?? 0) > 0}<button type="button" role="radio" aria-checked={!asap} class:on={!asap} onclick={() => (asap = false)}>{T('schedule')}</button>{/if}
 				</div>
 				{#if !asap}
-					<div class="daychips" role="radiogroup" aria-label={T('day')}>
+					<div class="daychips" role="radiogroup" aria-label={T('day')} data-mask>
 						{#each days as d, i (d.date)}<button type="button" role="radio" aria-checked={(day || days[0].date) === d.date} class="chip" class:on={(day || days[0].date) === d.date} onclick={() => (day = d.date)}>{d.label}</button>{/each}
 					</div>
 					{#if times === null}<p class="muted small loading-times"><Miso art={loadingArt} size={48} decorative />{T('loadingTimes')}</p>
 					{:else if !times.length}<p class="muted small">{T('noTimes')}</p>
 					{:else}
-						<label class="field"><span>{T('chooseTime')}</span><select bind:value={slot}>{#each times as x (x)}<option value={x}>{clock(x, S.timezone)}</option>{/each}</select></label>
+						<label class="field"><span>{T('chooseTime')}</span><select bind:value={slot} data-mask>{#each times as x (x)}<option value={x}>{clock(x, S.timezone)}</option>{/each}</select></label>
 					{/if}
 				{/if}
-				{#if !st?.accepting}<p class="muted small">{st?.state === 'paused' ? T('pausedSchedule') : T('notOpenYet')}</p>{/if}
+				{#if kitchenOff}
+					<div class="banner warn kitchen-off" role="status"><Icon name="info" size={16} /><span class="grow"><b>{T('kitchenOfflineTitle')}.</b> {T('kitchenOffline')} {T('kitchenOfflineSchedule')}</span>{#if S.phone}<a class="btn btn-sm" href={telHref(S.phone)}>{T('callStoreAt', { p: fmtPhone(S.phone) })}</a>{/if}</div>
+				{:else if !st?.accepting}<p class="muted small">{st?.state === 'paused' ? T('pausedSchedule') : T('notOpenYet')}</p>{/if}
 			</section>
 
 			<section class="card co-sec">
@@ -452,13 +539,13 @@
 				</div>
 				{#each [...quote.errors.map((x) => x.message), ...quote.warnings, ...quote.nudges] as m (m)}<div class="banner warn small"><Icon name="info" size={16} /><span class="grow">{m}</span></div>{/each}
 			{/if}
-			<button class="btn btn-p btn-lg btn-block place hide-m" type="submit" disabled={busy || quoting || !!quote?.errors.length}>
+			<button class="btn btn-p btn-lg btn-block place hide-m" type="submit" disabled={busy || quoting || asapBlocked || !!quote?.errors.length}>
 				<span class="split"><span>{busy ? T('placing') : T('placeOrder')}</span><span class="num">{quote ? money(quote.total_cents) : ''}</span></span>
 			</button>
 			{#if pay === 'card' && mode === 'square'}<p class="muted small center">{T('payTo', { s: S.name })}</p>{/if}
 		</aside>
 		<div class="placebar only-m">
-			<button class="btn btn-p btn-lg btn-block" type="submit" disabled={busy || quoting || !!quote?.errors.length}><span class="split"><span>{busy ? T('placing') : T('placeOrder')}</span><span class="num">{quote ? money(quote.total_cents) : ''}</span></span></button>
+			<button class="btn btn-p btn-lg btn-block" type="submit" disabled={busy || quoting || asapBlocked || !!quote?.errors.length}><span class="split"><span>{busy ? T('placing') : T('placeOrder')}</span><span class="num">{quote ? money(quote.total_cents) : ''}</span></span></button>
 		</div>
 	</form>
 {/if}

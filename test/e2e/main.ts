@@ -103,8 +103,16 @@ export class TestStore {
 	}
 
 	/** The fake sign-in code main logged for a phone (dev only). */
+	/** The fake code main sent to `phone`. Waits for it: a test that just clicked "Text me a code" can ask
+	 * before the send has landed, and main answers an empty code until then. */
 	async signinCode(phone: string): Promise<string> {
-		return (await this.adminCall('GET', `/dev/signin-code?phone=${phone}`, undefined, 200)).data.code;
+		const until = Date.now() + 10_000;
+		for (;;) {
+			const code: string = (await this.adminCall('GET', `/dev/signin-code?phone=${phone}`, undefined, 200)).data.code;
+			if (code) return code;
+			if (Date.now() > until) throw new Error(`no sign-in code for ${phone} within 10 s`);
+			await new Promise((r) => setTimeout(r, 100));
+		}
 	}
 
 	async destroy() {

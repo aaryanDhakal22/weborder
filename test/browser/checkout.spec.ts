@@ -299,6 +299,7 @@ test('"Have an account? Sign in" goes to sign-in and comes back to checkout', as
 	const phone = newPhone();
 	await page.getByLabel('Phone').fill(phone);
 	await page.getByRole('button', { name: 'Text me a code' }).click();
+	await expect(page.getByText(new RegExp(`We sent a code to .*${phone.slice(-4)}`))).toBeVisible();
 	await page.getByLabel('Code').fill(await shop.signinCode(phone));
 	await page.getByLabel('Your name (new accounts)').fill('Alan Turing');
 	await page.getByRole('button', { name: 'Sign in' }).click();

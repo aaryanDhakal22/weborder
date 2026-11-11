@@ -9,6 +9,12 @@ export const cfg = {
 	platformKey: env.PLATFORM_KEY || '',
 	/** How often a store's menu version, website settings and payments are re-checked (seconds). */
 	refreshS: Math.max(5, Number(env.REFRESH_SECONDS || 30)),
+	/** The order outbox's SQLite file (DURABILITY-PLAN.md); a volume in a container. */
+	outboxPath: env.OUTBOX_PATH || 'data/outbox.db',
+	/** How long Place order waits for main before the outbox takes over ("Still confirming"). */
+	orderWaitMs: Math.max(1000, Number(env.ORDER_WAIT_MS || 22_000)),
+	/** Allow plain http to a public main (never in production: the platform key would cross the internet). */
+	allowInsecureMain: env.ALLOW_INSECURE_MAIN === '1' || env.ALLOW_INSECURE_MAIN === 'true',
 	/** Behind a proxy that sets X-Forwarded-For / -Host (Caddy, Traefik). */
 	trustProxy: env.TRUST_PROXY === '1' || env.TRUST_PROXY === 'true',
 	/** Dev / LAN staging: "name:port=store-host,…" serves each store on its own port of one machine. */

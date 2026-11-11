@@ -15,5 +15,11 @@ services:
       PLATFORM_KEY: ${PLATFORM_KEY:?set PLATFORM_KEY (a qpk_ key from main's admin)}
       HOST_ALIASES: ${HOST_ALIASES:-192.168.1.221:3100=lombardis.staging.quiccpos.com}
       REFRESH_SECONDS: ${REFRESH_SECONDS:-30}
+    volumes:
+      # the order outbox: orders main hasn't answered yet survive a restart (DURABILITY-PLAN.md)
+      - storefront-data:/app/data
     ports:
       - "3100:3000"
+
+volumes:
+  storefront-data:

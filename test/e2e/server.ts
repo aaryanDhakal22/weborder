@@ -3,6 +3,9 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import http from 'node:http';
 import { createServer } from 'node:net';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 export async function freePort(): Promise<number> {
 	return new Promise((resolve) => {
@@ -24,12 +27,15 @@ export interface Res {
 export class TestServer {
 	port = 0;
 	private proc?: ChildProcess;
+	/** This server's own order outbox (parallel runs never share one). */
+	dataDir = '';
 
 	async start(env: Record<string, string>) {
 		this.port = await freePort();
+		this.dataDir = mkdtempSync(join(tmpdir(), 'storefront-test-'));
 		this.proc = spawn(process.execPath, ['build'], {
 			cwd: new URL('../..', import.meta.url).pathname,
-			env: { ...process.env, PORT: String(this.port), REFRESH_SECONDS: '5', ...env },
+			env: { ...process.env, PORT: String(this.port), REFRESH_SECONDS: '5', OUTBOX_PATH: join(this.dataDir, 'outbox.db'), ...env },
 			stdio: ['ignore', 'ignore', 'inherit']
 		});
 		for (let i = 0; i < 100; i++) {
@@ -45,6 +51,7 @@ export class TestServer {
 
 	stop() {
 		this.proc?.kill();
+		if (this.dataDir) rmSync(this.dataDir, { recursive: true, force: true });
 	}
 
 	req(host: string, path: string, opts: { method?: string; body?: unknown; headers?: Record<string, string> } = {}): Promise<Res> {

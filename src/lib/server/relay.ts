@@ -5,6 +5,7 @@ import { json, type RequestEvent } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { call, MainError } from './main';
 import { clearSession, setSession } from './session';
+import { viaHttps } from './tenancy';
 
 export interface RelayOpts {
 	/** Send the customer's session (account + orders). */
@@ -30,7 +31,7 @@ export async function relay(event: RequestEvent, method: string, path: string, o
 		const r = await call<Record<string, unknown> | null>(locals.host, method, path, { body, session: o.session ? (locals.session ?? undefined) : undefined, ip: locals.ip });
 		if (r.status === 401 && (r.data as { code?: string } | null)?.code === 'session_invalid') clearSession(cookies);
 		if (o.keepSession && r.status < 300 && typeof r.data?.session === 'string') {
-			setSession(cookies, r.data.session, !dev && url.protocol === 'https:');
+			setSession(cookies, r.data.session, !dev && viaHttps(request.headers, url));
 			const { session: _s, ...rest } = r.data;
 			return json(rest, { status: r.status });
 		}

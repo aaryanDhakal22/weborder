@@ -32,6 +32,8 @@ test('sign in by code: wrong code, change number, the right code, then Hi + the 
 	await page.getByRole('button', { name: 'Change number' }).click();
 	await expect(page.getByLabel('Phone')).toHaveValue(phone);
 	await page.getByRole('button', { name: 'Text me a code' }).click();
+	// the second send replaces the first code: wait for it to land, or main still has the old one
+	await expect(page.getByText(new RegExp(`We sent a code to .*${phone.slice(-4)}`))).toBeVisible();
 	await page.getByLabel('Code').fill(await shop.signinCode(phone));
 	await page.getByLabel('Your name (new accounts)').fill('Grace Hopper');
 	await signInBtn.click();

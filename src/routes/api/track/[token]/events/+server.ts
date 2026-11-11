@@ -8,8 +8,9 @@ import type { Track } from '$lib/types';
 
 export const GET = async ({ locals, params, request }) => {
 	const host = locals.host;
+	const ip = locals.ip; // this feed's customer: every re-read below counts against them, not the storefront
 	const path = `/track/v1/${encodeURIComponent(params.token)}`;
-	const first = await trackFor(host, params.token);
+	const first = await trackFor(host, params.token, ip);
 	if (!first.track) return json({ error: 'not found', code: 'not_found' }, { status: first.status });
 	const orderId = first.track.order_id;
 	const enc = new TextEncoder();
@@ -32,7 +33,7 @@ export const GET = async ({ locals, params, request }) => {
 				}
 				busy = true;
 				try {
-					const r = await call<Track>(host, 'GET', path);
+					const r = await call<Track>(host, 'GET', path, { ip });
 					if (r.status === 200) send(r.data);
 				} catch {
 					/* main away: the next event or the poll retries */

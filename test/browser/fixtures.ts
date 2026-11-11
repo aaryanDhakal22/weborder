@@ -6,6 +6,7 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
 import { MAIN, TestStore, adminKey, mainUp, platformKey } from '../e2e/main.ts';
 import { TestServer } from '../e2e/server.ts';
+import { piOffline } from './api.ts';
 
 export { expect };
 
@@ -38,8 +39,9 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 			const pk = await platformKey(admin);
 			const srv = new TestServer();
 			// TRUST_PROXY: each test names its own customer IP. REFRESH_SECONDS=1: a published change
-			// shows within a second or two.
-			await srv.start({ MAIN_URL: MAIN, PLATFORM_KEY: pk.key, TRUST_PROXY: '1', REFRESH_SECONDS: '1' });
+			// shows within a second or two. ORDER_WAIT_MS=6000: main's slow test card (9 s) outlasts
+			// the page's wait, so "Still confirming" can be reached (durability.spec.ts).
+			await srv.start({ MAIN_URL: MAIN, PLATFORM_KEY: pk.key, TRUST_PROXY: '1', REFRESH_SECONDS: '1', ORDER_WAIT_MS: '6000' });
 			await use({ srv, url: (s, path = '/') => `http://${s.host}:${srv.port}${path}` });
 			srv.stop();
 			await pk.revoke();
@@ -51,6 +53,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 			void site;
 			const s = await new TestStore(admin).create('Test Pizza');
 			await use(s);
+			piOffline(s);
 			await s.destroy();
 		},
 		{ scope: 'worker', timeout: 60_000 }
@@ -83,6 +86,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 			made.push(s);
 			return s;
 		});
+		made.forEach(piOffline);
 		await Promise.allSettled(made.map((s) => s.destroy()));
 	}
 });

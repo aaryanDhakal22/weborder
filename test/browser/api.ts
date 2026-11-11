@@ -15,15 +15,43 @@ async function call(method: string, url: string, headers: Record<string, string>
 }
 
 const keys = new WeakMap<TestStore, string>();
+const streams = new Map<TestStore, AbortController>();
 
-/** The store's agent key (an admin-minted device), made once per store. */
-async function deviceKey(s: TestStore): Promise<string> {
+/** The store's agent key (an admin-minted device), made once per store. A store with a Pi key and
+ * no live Pi stream is "kitchen offline" (main refuses ASAP orders), so the stream is opened too
+ * unless `stream: false` (the kitchen-offline tests). */
+export async function deviceKey(s: TestStore, o: { stream?: boolean } = {}): Promise<string> {
 	let k = keys.get(s);
 	if (!k) {
 		k = (await s.adminCall('POST', '/devices', { location_id: s.locationId, name: 'browser-test-agent' }, 201)).data.api_key as string;
 		keys.set(s, k);
 	}
+	if (o.stream !== false) await piOnline(s);
 	return k;
+}
+
+/** Holds the store's Pi stream open (main's /api/v1/events/orders), like a running Pi; read and
+ * dropped. Mirrors main's tests/conftest.py store.online(). */
+export async function piOnline(s: TestStore) {
+	if (streams.has(s)) return;
+	const ctl = new AbortController();
+	streams.set(s, ctl);
+	const r = await fetch(`${MAIN}/api/v1/events/orders`, { headers: { 'X-STORE-API-KEY': await deviceKey(s, { stream: false }), accept: 'text/event-stream' }, signal: ctl.signal });
+	if (r.status !== 200) throw new Error(`Pi stream: ${r.status}`);
+	const reader = r.body!.getReader();
+	(async () => {
+		try {
+			for (;;) if ((await reader.read()).done) return;
+		} catch {
+			/* closed */
+		}
+	})();
+}
+
+/** Closes the store's Pi stream (before the store is deleted, or to take its kitchen offline). */
+export function piOffline(s: TestStore) {
+	streams.get(s)?.abort();
+	streams.delete(s);
 }
 
 /** An RPC from the store's "Pi" (main answers on the same request). */

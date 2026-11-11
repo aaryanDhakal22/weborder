@@ -35,8 +35,22 @@ to main's shared cases by `test/unit/engine.test.ts` and `npm run sync-engine --
 
 ## Checkout and payments
 
-`POST /api/orders` → main `POST /channel/v1/orders` with a `client_order_id` kept per cart (a
-retry returns the same order). Card: the Square Web Payments SDK draws the form in Square's
+`POST /api/orders` → main `POST /channel/v1/orders` with a `client_order_id` (the idempotency key)
+and an `expires_at` deadline (ASAP: 5 minutes; scheduled: the promised time less the prep time).
+**The order outbox** (`src/lib/server/outbox.ts`, SQLite at `OUTBOX_PATH`, DURABILITY-PLAN.md):
+the order is written on the storefront's disk before main is asked, and stays until main gives a
+final answer. main's answer within `ORDER_WAIT_MS` (22 s) goes straight back; anything else (no
+answer, main down, 5xx, 202) answers the page `202 {state: pending}`, and a worker asks main's
+`GET /channel/v1/orders/by-key/{key}`, sending the same body again when main never saw it, until
+main says placed / refused / expired / voided, or the deadline passes unseen ("not placed, nothing
+charged"). The page shows **Still confirming** (the key is in the cart, so it survives a reload)
+and polls `/api/orders/by-key/{key}`. The key is kept for a retry of an unanswered attempt and for
+3-D Secure, and renewed after any final refusal; main's `key_reused` makes the outbox ask main
+what the key holds (an earlier attempt may have been placed: never twice).
+**Kitchen offline:** main's `/channel/v1/store` says `kitchen_offline` when the store's Pi can't get
+an order; the status bar and checkout say so, ASAP is off and only times ≥ 1 h away are offered.
+**Network:** the server won't start with plain `http` to a public main; the session cookie's Secure
+flag and HSTS follow `X-Forwarded-Proto` behind a trusted proxy. Card: the Square Web Payments SDK draws the form in Square's
 iframe and returns a one-time token (no card data on our servers); Google Pay through the same
 SDK; Apple Pay waits for a public domain registered with Square. main authorizes (a hold) and
 captures later (clock-out, Close batch, 24 h). 3-D Secure: main answers `402

@@ -1,7 +1,10 @@
 // Every request: host → store (through main) or a neutral 404 with no store data. main answers
 // unknown_site for a host no store is served on, so tenancy is main's decision, not ours.
-import type { Handle } from '@sveltejs/kit';
-import { clientIp, hopeless, requestHost } from '$lib/server/tenancy';
+import type { Handle, ServerInit } from '@sveltejs/kit';
+import { clientIp, hopeless, requestHost, viaHttps } from '$lib/server/tenancy';
+import { cfg } from '$lib/server/config';
+import { mainUrlProblem } from '$lib/server/mainurl';
+import { outbox } from '$lib/server/outbox-run';
 import { previewOf, storeFor } from '$lib/server/store';
 import { PREVIEW } from './hooks';
 import { COOKIE } from '$lib/server/session';
@@ -13,6 +16,14 @@ const page = (title: string, body: string) => `<!doctype html><html lang="en"><h
 
 const NOT_FOUND = page('Not found', "<h1>There's no store here</h1><p>Check the address, or ask the restaurant for its ordering link.</p>");
 const UNAVAILABLE = page('Back soon', '<h1>Ordering is down for a moment</h1><p>Please try again in a minute, or call the restaurant.</p>');
+
+// Startup: never send the platform key to main in the clear over the internet (DURABILITY-PLAN.md,
+// "Network"); open the order outbox so orders a previous run left pending are sent on at once.
+export const init: ServerInit = async () => {
+	const problem = mainUrlProblem(cfg.mainUrl, cfg.allowInsecureMain);
+	if (problem) throw new Error(problem);
+	outbox();
+};
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const path = event.url.pathname;
@@ -47,6 +58,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const lang = langs.slice(1).includes(seg as never) ? seg : langs[0];
 	const res = await resolve(event, { transformPageChunk: ({ html }) => html.replace('%lang%', lang) });
 	res.headers.set('x-content-type-options', 'nosniff');
+	if (viaHttps(event.request.headers, event.url)) res.headers.set('strict-transport-security', 'max-age=31536000');
 	res.headers.set('referrer-policy', 'strict-origin-when-cross-origin');
 	if (pv) {
 		// The Website page frames the preview (the token is the secret); never indexed.
