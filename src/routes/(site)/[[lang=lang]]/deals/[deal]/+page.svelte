@@ -79,7 +79,7 @@
 			<div class="confetti" aria-hidden="true">{#each Array(22) as _, i (i)}<i style="left:{(i * 37) % 100}%;top:{8 + ((i * 53) % 46)}%;background:{['var(--q-brand)', 'var(--q-save)', 'var(--q-ok)', 'var(--q-info)'][i % 4]};transform:rotate({(i * 47) % 180}deg)"></i>{/each}</div>
 			{#if S.look.miso.pages}<Miso art={doneArt} size={170} decorative />{/if}
 			<h2>{T('dealDone')}</h2>
-			<p>{D.name}{#if save} · {T('savedYou', { m: money(save) })}{/if}</p>
+			<p>{D.name}{#if save}{' · '}{T('savedYou', { m: money(save) })}{/if}</p>
 			<div class="actions"><a class="btn btn-p btn-lg btn-block" href="{b}/cart">{T('viewOrder')}</a><button type="button" class="btn btn-lg btn-block" onclick={restart}>{T('buildAnother')}</button></div>
 		</div>
 	{:else}
@@ -120,7 +120,7 @@
 	<div class="pad auto-deal">
 		{#if D.description}<p class="lead">{D.description}</p>{/if}
 		{#if D.kind === 'code' && D.code}
-			<div class="banner info"><Icon name="tag" size={18} /><span class="grow">{T('useCode', { c: D.code })}{#if D.min_subtotal_cents} · {T('minSubtotal', { m: money(D.min_subtotal_cents) })}{/if}</span></div>
+			<div class="banner info"><Icon name="tag" size={18} /><span class="grow">{T('useCode', { c: D.code })}{#if D.min_subtotal_cents}{' · '}{T('minSubtotal', { m: money(D.min_subtotal_cents) })}{/if}</span></div>
 		{:else}
 			<p class="muted">{T('appliesItself')}</p>
 		{/if}

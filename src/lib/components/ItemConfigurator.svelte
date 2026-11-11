@@ -151,7 +151,7 @@
 						<div class="opt" class:off={o.sold_out}>
 							<button type="button" class="opt-main" role={single(g) ? 'radio' : 'checkbox'} aria-checked={!!on} disabled={o.sold_out && !on} onclick={() => toggle(g, o.id)}>
 								<span class={single(g) ? 'radio' : 'check'} class:on={!!on}>{#if on && !single(g)}<Icon name="check" size={14} stroke={3} />{/if}</span>
-								<span class="nm">{o.name}{#if o.sold_out} <span class="tag tag-brand">{T('soldOut')}</span>{/if}</span>
+								<span class="nm">{o.name}{#if o.sold_out}{' '}<span class="tag tag-brand">{T('soldOut')}</span>{/if}</span>
 							</button>
 							{#if g.portions && on}
 								<span class="portion" role="radiogroup" aria-label="{o.name}: {T('whole')} / {T('left')} / {T('right')}">

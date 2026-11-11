@@ -17,9 +17,11 @@
     "store": "node scripts/store.ts",
     "shots": "node scripts/screenshots.ts",
     "export": "node scripts/export-static.ts",
-    "perf": "node scripts/perf.ts"
+    "perf": "node scripts/perf.ts",
+    "test:browser": "vite build && playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@sveltejs/adapter-node": "5.5.7",
     "@sveltejs/kit": "2.70.3",
     "@sveltejs/vite-plugin-svelte": "6.2.4",

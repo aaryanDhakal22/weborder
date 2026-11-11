@@ -30,7 +30,11 @@ export async function mainUp(): Promise<boolean> {
 type Json = Record<string, any>;
 
 async function req(method: string, url: string, headers: Record<string, string>, body?: unknown, expect?: number): Promise<{ status: number; data: any; headers: Headers }> {
-	const r = await fetch(url, { method, headers: { ...headers, ...(body === undefined ? {} : { 'content-type': 'application/json' }) }, body: body === undefined ? undefined : JSON.stringify(body) });
+	const r = await fetch(url, { method, headers: { ...headers, ...(body === undefined ? {} : { 'content-type': 'application/json' }) }, body: body === undefined ? undefined : JSON.stringify(body) }).catch((e) => {
+		// name the call and the socket errors (a bare "fetch failed" says neither)
+		const errs = (e?.cause?.errors ?? [e?.cause]).filter(Boolean).map((x: Error & { code?: string }) => x.code ?? x.message);
+		throw new Error(`${method} ${url}: ${e?.message} (${errs.join(', ')})`);
+	});
 	const text = await r.text();
 	const data = text ? JSON.parse(text) : null;
 	if (expect !== undefined && r.status !== expect) throw new Error(`${method} ${url}: ${r.status} ${text.slice(0, 300)}`);

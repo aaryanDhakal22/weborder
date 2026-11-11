@@ -17,7 +17,7 @@
 		<h2 class="h">{t(lang, 'hours')}</h2>
 		<div class="hours">
 			{#each rows as r (r.date)}
-				<span class="d" class:today={r.today}>{r.day}</span><span class="num" class:today={r.today}>{r.text}{r.today ? ` · ${t(lang, 'today')}` : ''}{#if r.note}<em class="note"> · {r.note}</em>{/if}</span>
+				<span class="d" class:today={r.today}>{r.day}</span><span class="num" class:today={r.today}>{r.text}{r.today ? ` · ${t(lang, 'today')}` : ''}{#if r.note}<em class="note">{` · ${r.note}`}</em>{/if}</span>
 			{/each}
 		</div>
 		{#if where || store.phone}

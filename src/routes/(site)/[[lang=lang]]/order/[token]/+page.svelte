@@ -92,7 +92,7 @@
 			{#if o.status === 'cancelled'}<div class="eta">{T('cancelledSub')}</div>
 			{:else if o.status === 'completed'}<div class="eta"><b>{deliv ? T('done') : T('doneP')}</b></div>
 			{:else if due}<div class="eta">{deliv ? T('arrives') : T('readyAt')} <b>{clock(due, S.timezone)}</b></div>
-			{:else}<div class="eta">{T('waitingAccept')}</div>{/if}
+			{:else if o.status === 'received' || o.status === 'scheduled'}<div class="eta">{T('waitingAccept')}</div>{/if}
 			{#if o.driver && o.status === 'on_delivery'}<div class="driver"><Icon name="scooter" size={18} /> {T('onTheWay', { n: o.driver.first_name })}</div>{/if}
 		</div>
 		{#if o.status !== 'cancelled'}

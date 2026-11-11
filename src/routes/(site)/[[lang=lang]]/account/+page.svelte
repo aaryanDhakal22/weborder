@@ -233,7 +233,7 @@
 			<div class="sec-h"><h2>{T('savedAddresses')}</h2>{#if !addr && me.addresses.length < 20}<button type="button" class="btn btn-sm" onclick={() => (addr = { default: !me.addresses.length })}>{T('add')}</button>{/if}</div>
 			{#each me.addresses as a (a.id)}
 				<div class="item">
-					<div class="grow"><b>{a.label || a.line1}{#if a.default} <span class="tag tag-brand">{T('default')}</span>{/if}</b><span class="t2 small">{[a.line1, a.line2, a.city, a.state, a.zip].filter(Boolean).join(', ')}</span>{#if a.notes}<span class="muted small">{a.notes}</span>{/if}</div>
+					<div class="grow"><b>{a.label || a.line1}{#if a.default}{' '}<span class="tag tag-brand">{T('default')}</span>{/if}</b><span class="t2 small">{[a.line1, a.line2, a.city, a.state, a.zip].filter(Boolean).join(', ')}</span>{#if a.notes}<span class="muted small">{a.notes}</span>{/if}</div>
 					<button type="button" class="btn btn-sm btn-ghost" onclick={() => (addr = { ...a })}>{T('edit')}</button>
 					<button type="button" class="btn btn-icon btn-ghost" aria-label={T('remove')} onclick={() => removeAddress(a.id)}><Icon name="trash" size={18} /></button>
 				</div>

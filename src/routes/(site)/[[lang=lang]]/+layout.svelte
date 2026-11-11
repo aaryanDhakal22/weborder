@@ -111,7 +111,7 @@
 		</div>
 	</header>
 	{#if status}
-		<div class="statusbar pad tone-{status.tone}" role="status">{status.text}{#if live?.pause?.note} · {live.pause.note}{/if}</div>
+		<div class="statusbar pad tone-{status.tone}" role="status">{status.text}{#if live?.pause?.note}{` · ${live.pause.note}`}{/if}</div>
 	{/if}
 	<div class="shell">
 		{#if nav === 'side'}
@@ -122,7 +122,7 @@
 					<a class:on={active === 'menu'} href="{b}/menu"><Icon name="list" size={18} />{T('menu')}</a>
 					<a class:on={active === 'deals'} href="{b}/deals"><Icon name="tag" size={18} />{T('deals')}</a>
 					<a class:on={active === 'contact'} href="{b}/contact"><Icon name="pin" size={18} />{T('visit')}</a>
-					<a class:on={active === 'cart'} href="{b}/cart"><Icon name="cart" size={18} />{T('cart')}{#if cart.count} <span class="tag tag-brand">{cart.count}</span>{/if}</a>
+					<a class:on={active === 'cart'} href="{b}/cart"><Icon name="cart" size={18} />{T('cart')}{#if cart.count}{' '}<span class="tag tag-brand">{cart.count}</span>{/if}</a>
 				</nav>
 				{#if S.address.line1}
 					<div class="card side-card">
@@ -138,7 +138,7 @@
 		<main class="main" id="main">
 			{@render children()}
 			<footer class="foot pad">
-				<span>{[S.address.line1, S.address.line2].filter(Boolean).join(', ')}{#if S.phone} · <a href={telHref(S.phone)}>{fmtPhone(S.phone)}</a>{/if}</span>
+				<span>{[S.address.line1, S.address.line2].filter(Boolean).join(', ')}{#if S.phone}{' · '}<a href={telHref(S.phone)}>{fmtPhone(S.phone)}</a>{/if}</span>
 				<a href="{b}/privacy">{T('privacy')}</a>
 				<a class="byq" href="https://quiccpos.com" rel="noopener"><i>q</i> {T('poweredBy')}</a>
 			</footer>

@@ -134,23 +134,35 @@
 	);
 
 	// --- quote
+	// the cart loads in the layout's onMount, after this page starts: take its code once it's there
 	let code = $state(untrack(() => cart.code));
+	let codeTaken = untrack(() => cart.ready);
+	$effect(() => {
+		if (!cart.ready || codeTaken) return;
+		codeTaken = true;
+		code ||= cart.code;
+	});
 	let quote = $state<Quote | null>(null);
+	// true from a change until main's quote for it is back: Place order waits for it, so the total it
+	// sends (expected_total_cents) is never the previous choice's (main would answer "prices changed")
 	let quoting = $state(false);
+	let quoteSeq = 0;
 	$effect(() => {
 		const lines = $state.snapshot(cart.entries).map((e) => e.line);
 		const body = { type: cart.fulfil, payment: pay, lines, code: code.trim(), ...tipBody };
 		if (!cart.ready || !lines.length) return;
 		const ctl = new AbortController();
+		const seq = ++quoteSeq;
 		quoting = true;
 		const id = setTimeout(async () => {
 			try {
 				const r = await fetch('/api/quote', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
-				if (r.ok) quote = await r.json();
+				const q = r.ok ? await r.json() : null;
+				if (q && seq === quoteSeq) quote = q;
 			} catch {
-				/* aborted */
+				/* aborted: a newer quote is on its way */
 			}
-			quoting = false;
+			if (seq === quoteSeq) quoting = false;
 		}, 200);
 		return () => {
 			clearTimeout(id);
@@ -212,7 +224,7 @@
 
 	async function place(e?: SubmitEvent, payment?: Record<string, unknown>) {
 		e?.preventDefault();
-		if (busy) return;
+		if (busy || quoting) return;
 		failure = null;
 		if (missing) {
 			failure = { code: 'missing', message: T('fillIn', { f: missing }) };
@@ -340,7 +352,7 @@
 			<section class="card co-sec">
 				<h2><span class="stepno">2</span>{T('when')}</h2>
 				<div class="seg full" role="radiogroup">
-					<button type="button" role="radio" aria-checked={asap} class:on={asap} disabled={!st?.accepting} onclick={() => (asap = true)}>{T('asap')}{#if st?.accepting} · <span class="num">~{deliv ? types.delivery.eta_minutes : types.pickup.eta_minutes} {T('minutes')}</span>{/if}</button>
+					<button type="button" role="radio" aria-checked={asap} class:on={asap} disabled={!st?.accepting} onclick={() => (asap = true)}>{T('asap')}{#if st?.accepting}{' · '}<span class="num">~{deliv ? types.delivery.eta_minutes : types.pickup.eta_minutes} {T('minutes')}</span>{/if}</button>
 					{#if (st?.scheduling.days_ahead ?? 0) > 0}<button type="button" role="radio" aria-checked={!asap} class:on={!asap} onclick={() => (asap = false)}>{T('schedule')}</button>{/if}
 				</div>
 				{#if !asap}
@@ -440,13 +452,13 @@
 				</div>
 				{#each [...quote.errors.map((x) => x.message), ...quote.warnings, ...quote.nudges] as m (m)}<div class="banner warn small"><Icon name="info" size={16} /><span class="grow">{m}</span></div>{/each}
 			{/if}
-			<button class="btn btn-p btn-lg btn-block place hide-m" type="submit" disabled={busy || !!quote?.errors.length}>
+			<button class="btn btn-p btn-lg btn-block place hide-m" type="submit" disabled={busy || quoting || !!quote?.errors.length}>
 				<span class="split"><span>{busy ? T('placing') : T('placeOrder')}</span><span class="num">{quote ? money(quote.total_cents) : ''}</span></span>
 			</button>
 			{#if pay === 'card' && mode === 'square'}<p class="muted small center">{T('payTo', { s: S.name })}</p>{/if}
 		</aside>
 		<div class="placebar only-m">
-			<button class="btn btn-p btn-lg btn-block" type="submit" disabled={busy || !!quote?.errors.length}><span class="split"><span>{busy ? T('placing') : T('placeOrder')}</span><span class="num">{quote ? money(quote.total_cents) : ''}</span></span></button>
+			<button class="btn btn-p btn-lg btn-block" type="submit" disabled={busy || quoting || !!quote?.errors.length}><span class="split"><span>{busy ? T('placing') : T('placeOrder')}</span><span class="num">{quote ? money(quote.total_cents) : ''}</span></span></button>
 		</div>
 	</form>
 {/if}

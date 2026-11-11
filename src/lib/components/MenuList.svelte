@@ -22,7 +22,7 @@
 				<h2 id="h-{c.slug}">{c.name}</h2>
 				{#each c.items as i (i.id)}
 					<a class="p-item" class:sold={sold(i)} href="{base}/menu/{i.slug}" onclick={(e) => onpick(e, i)}>
-						<span class="nm">{i.name}{#if popular.includes(i.id)} <span class="tag tag-save"><Icon name="flame" size={11} /> {T('popular')}</span>{/if}{#if sold(i)} <span class="tag tag-brand">{T('soldOut')}</span>{/if}</span>
+						<span class="nm">{i.name}{#if popular.includes(i.id)}{' '}<span class="tag tag-save"><Icon name="flame" size={11} /> {T('popular')}</span>{/if}{#if sold(i)}{' '}<span class="tag tag-brand">{T('soldOut')}</span>{/if}</span>
 						<span class="lead"></span><span class="pr">{money(fromPrice(i))}</span>
 						{#if i.description}<span class="ds">{i.description}</span>{/if}
 					</a>
@@ -55,7 +55,7 @@
 					<a class="row" class:sold={sold(i)} href="{base}/menu/{i.slug}" onclick={(e) => onpick(e, i)}>
 						<ItemTile name={i.name} small />
 						<div class="txt">
-							<span class="nm">{i.name}{#if popular.includes(i.id)} <span class="tag tag-pop"><Icon name="flame" size={12} /> {T('popular')}</span>{/if}{#if sold(i)} <span class="tag tag-brand">{T('soldOut')}</span>{/if}</span>
+							<span class="nm">{i.name}{#if popular.includes(i.id)}{' '}<span class="tag tag-pop"><Icon name="flame" size={12} /> {T('popular')}</span>{/if}{#if sold(i)}{' '}<span class="tag tag-brand">{T('soldOut')}</span>{/if}</span>
 							{#if i.description}<span class="ds">{i.description}</span>{/if}
 							<span class="pr">{#if many(i)}<small>{T('from')}</small>{/if}{money(fromPrice(i))}</span>
 							{#if i.sizes.length > 1}<span class="sizes hide-m">{#each i.sizes as s (s.size_id)}<span>{sizeShort(menu, s.size_id, s.name)} {money(s.price_cents)}</span>{/each}</span>{/if}

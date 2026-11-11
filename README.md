@@ -42,13 +42,17 @@ offers its own test cards. Sign-in codes are logged by dev main
 ```bash
 npm test               # unit: main's pricing engine copy vs main's 29 shared cases, menu + look helpers
 npm run test:e2e       # builds, then runs against a live main (dev by default): two throwaway stores
+npm run test:browser   # builds, then Playwright clicks every page and control (test/browser/, phone +
+                       # desktop, 36 screenshot baselines) against a live main; each worker its own store
 npm run check          # svelte-check
 npm run sync-engine    # copy main's engine + cases after main changes them (`-- --check` compares)
 BASE_PORT=5180 npm run shots   # screenshots of every page × phone / tablet / laptop (needs a running server)
 ```
 
-`task gate` (repo root) runs `check` + unit + the engine check in its static lane and `test:e2e`
-after the dev suites.
+`task gate` (repo root) runs `check` + unit + the engine check in its static lane, and `test:e2e`
+then the browser tests after the dev suites. Browsers: `npx playwright install chromium` once.
+A look changed on purpose: `npx playwright test screenshots --update-snapshots`, then look at the
+new images before committing them.
 
 ## Deploy
 

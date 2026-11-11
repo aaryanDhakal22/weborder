@@ -50,7 +50,8 @@ export const telHref = (p: string) => `tel:+1${p.replace(/\D/g, '').replace(/^1(
 export function weekRows(week: { date: string; closed: boolean; hours: { open: string; close: string }[]; note: string }[], lang: Lang, closedLabel: string, alwaysLabel: string, hoursSet = true) {
 	return week.map((d, i) => {
 		const day = new Intl.DateTimeFormat(lang === 'es' ? 'es-US' : 'en-US', { timeZone: 'UTC', weekday: 'short' }).format(new Date(`${d.date}T12:00:00Z`));
-		const text = !hoursSet ? alwaysLabel : d.closed || !d.hours.length ? closedLabel : d.hours.map((h) => `${fmtHHMM(h.open)} – ${fmtHHMM(h.close)}`).join(', ');
+		// a closed date wins over "always open" (no regular hours), and a date's own hours show either way
+		const text = d.closed ? closedLabel : d.hours.length ? d.hours.map((h) => `${fmtHHMM(h.open)} – ${fmtHHMM(h.close)}`).join(', ') : !hoursSet ? alwaysLabel : closedLabel;
 		return { date: d.date, day, today: i === 0, text, note: d.note };
 	});
 }

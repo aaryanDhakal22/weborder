@@ -93,7 +93,7 @@
 						<b>{qty}</b>
 						<button type="button" aria-label={T('more')} onclick={() => cart.setQty(i, qty + 1)}><Icon name="plus" size={16} /></button>
 					</span>
-					<div class="txt"><span class="nm">{e.name}{#if e.line.deal_id} <span class="tag tag-save">{T('deal')}</span>{/if}</span>{#if e.mods.length}<span class="mods">{e.mods.join(' · ')}</span>{/if}{#if lineErr(i)}<span class="err">{lineErr(i)}</span>{/if}</div>
+					<div class="txt"><span class="nm">{e.name}{#if e.line.deal_id}{' '}<span class="tag tag-save">{T('deal')}</span>{/if}</span>{#if e.mods.length}<span class="mods">{e.mods.join(' · ')}</span>{/if}{#if lineErr(i)}<span class="err">{lineErr(i)}</span>{/if}</div>
 					<span class="pr num">{money(q?.total_cents ?? e.unitCents * qty)}{#if q?.regular_cents && q.regular_cents > q.unit_cents}<span class="was">{money(q.regular_cents * qty)}</span>{/if}</span>
 				</li>
 			{/each}
