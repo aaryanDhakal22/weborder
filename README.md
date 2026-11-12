@@ -34,7 +34,7 @@ offers its own test cards. Sign-in codes are logged by dev main
 | `ALLOW_INSECURE_MAIN` | off | `1`: allow plain `http` to a public main (test setups only: the platform key would cross the internet unencrypted) |
 | `OUTBOX_PATH` | `data/outbox.db` | the order outbox (SQLite): orders written before main is asked, kept until main answers. A volume in a container (`/app/data`) |
 | `ORDER_WAIT_MS` | `22000` | how long Place order waits for main before the outbox takes over ("Still confirming") |
-| `PLATFORM_KEY` | — | the storefront's `qpk_…` key (main admin → Platform keys) |
+| `PLATFORM_KEY` | — | the storefront's `qpk_…` key (main admin → Platform keys); also relays Square's OAuth redirect (`/square/oauth/callback`, see docs/ARCHITECTURE.md) |
 | `REFRESH_SECONDS` | `30` | how often each store's menu version, website settings and payments are re-checked |
 | `TRUST_PROXY` | off | `1` behind Caddy / Traefik: read `X-Forwarded-Host` / `-For` / `-Proto` (the Secure cookie flag and HSTS follow `-Proto`) |
 | `HOST_ALIASES` | — | `name:port=store-host,…` — serve a store on a LAN address (staging) |

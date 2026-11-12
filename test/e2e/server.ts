@@ -30,14 +30,24 @@ export class TestServer {
 	/** This server's own order outbox (parallel runs never share one). */
 	dataDir = '';
 
-	async start(env: Record<string, string>) {
+	/** The server's stdout + stderr when started with `capture` (tests that check what is logged). */
+	output = '';
+
+	async start(env: Record<string, string>, o: { capture?: boolean } = {}) {
 		this.port = await freePort();
 		this.dataDir = mkdtempSync(join(tmpdir(), 'storefront-test-'));
 		this.proc = spawn(process.execPath, ['build'], {
 			cwd: new URL('../..', import.meta.url).pathname,
 			env: { ...process.env, PORT: String(this.port), REFRESH_SECONDS: '5', OUTBOX_PATH: join(this.dataDir, 'outbox.db'), ...env },
-			stdio: ['ignore', 'ignore', 'inherit']
+			stdio: o.capture ? ['ignore', 'pipe', 'pipe'] : ['ignore', 'ignore', 'inherit']
 		});
+		if (o.capture) {
+			this.proc.stdout?.on('data', (c) => (this.output += c));
+			this.proc.stderr?.on('data', (c) => {
+				this.output += c;
+				process.stderr.write(c);
+			});
+		}
 		for (let i = 0; i < 100; i++) {
 			try {
 				await this.req('nobody.localhost', '/');

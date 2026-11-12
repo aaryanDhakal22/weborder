@@ -5,6 +5,7 @@
 ```
 browser ──► (Caddy / Traefik) ──► node build (SvelteKit, adapter-node)
                                    hooks.server.ts
+                                    ├─ /square/oauth/callback (any host) → main's OAuth relay
                                     ├─ host → main (/channel/v1/me with X-Site-Host)
                                     │    ├─ unknown_site → neutral 404, no store data
                                     │    └─ a store → locals.store (cached per host)
@@ -56,6 +57,24 @@ SDK; Apple Pay waits for a public domain registered with Square. main authorizes
 captures later (clock-out, Close batch, 24 h). 3-D Secure: main answers `402
 verification_required`, the page runs `verifyBuyer` and retries. Without a Square app the page
 offers main's test card (dev / staging) or the fake Square's test cards.
+
+## Square OAuth relay (`src/lib/server/squareoauth.ts`)
+
+main is private, so the Square app's one registered redirect URL is this server's
+`GET /square/oauth/callback` (main's `SQUARE_REDIRECT_URL`). It is answered on **any host**, before
+the host → store lookup (main's signed `state` names the store). The storefront:
+- checks the shape only: `state` = `<uuid>.<unix expiry>.<43-char MAC>` and not expired (2 min of
+  clock skew), `code` / `error` charsets; anything else gets a plain 400 page and **never reaches
+  main**;
+- relays `{code, state}` (or `{state, error}` when the owner said no) to main's
+  `POST /square/oauth/forward` with the platform key alone; main checks the key, the state's
+  signature + expiry, and exchanges the code;
+- sends the browser to main's `redirect` (Store › Payments `?square=…`) with a 303,
+  `Referrer-Policy: no-referrer` and `no-store`; when main can't be reached, refuses the key or
+  gives no absolute URL, a plain page says to press Connect Square again.
+
+**The code is never logged or kept** (logs name only what happened; tests check the server's
+output, the page and the headers).
 
 ## Accounts
 

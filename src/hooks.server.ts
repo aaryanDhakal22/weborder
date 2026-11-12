@@ -8,6 +8,7 @@ import { outbox } from '$lib/server/outbox-run';
 import { previewOf, storeFor } from '$lib/server/store';
 import { PREVIEW } from './hooks';
 import { COOKIE } from '$lib/server/session';
+import { SQUARE_CALLBACK, mainForwarder, squareCallback } from '$lib/server/squareoauth';
 
 const page = (title: string, body: string) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${title}</title>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f0d1a;color:#f4f1fb;font:16px/1.5 system-ui,sans-serif;text-align:center;padding:24px}
@@ -16,6 +17,8 @@ const page = (title: string, body: string) => `<!doctype html><html lang="en"><h
 
 const NOT_FOUND = page('Not found', "<h1>There's no store here</h1><p>Check the address, or ask the restaurant for its ordering link.</p>");
 const UNAVAILABLE = page('Back soon', '<h1>Ordering is down for a moment</h1><p>Please try again in a minute, or call the restaurant.</p>');
+
+const relay = mainForwarder(cfg.mainUrl, cfg.platformKey);
 
 // Startup: never send the platform key to main in the clear over the internet (DURABILITY-PLAN.md,
 // "Network"); open the order outbox so orders a previous run left pending are sent on at once.
@@ -28,6 +31,8 @@ export const init: ServerInit = async () => {
 export const handle: Handle = async ({ event, resolve }) => {
 	const path = event.url.pathname;
 	if (path === '/healthz') return new Response('ok', { headers: { 'content-type': 'text/plain' } });
+	// Square's OAuth redirect for every store, on any host (the signed state names the store).
+	if (path === SQUARE_CALLBACK && event.request.method === 'GET') return squareCallback(event.url, { forward: relay });
 
 	const host = requestHost(event.request.headers);
 	event.locals.host = host;

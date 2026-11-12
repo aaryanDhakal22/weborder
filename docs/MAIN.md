@@ -15,5 +15,10 @@ OpenAPI (`GET /channel/v1/openapi.json`) and quicc-ops `contract/main.md` §2.5z
 | `GET /api/track/{token}/events` | one `GET /channel/v1/events` per store (SSE), shared |
 | `/api/account/*` | `/channel/v1/account/*` (+ `X-Customer-Session`, `X-Customer-IP`) |
 
+**One call without a host:** Square's OAuth redirect. The Square app's redirect URL is this
+server's `GET /square/oauth/callback` (any host); it relays `{code, state}` to main's
+`POST /square/oauth/forward` with the platform key alone (main's signed `state` names the store)
+and sends the browser to main's `redirect` (Store › Payments). See ARCHITECTURE.md.
+
 Errors are relayed with main's status and `{error, code}`; a `401 session_invalid` clears the
 session cookie.
