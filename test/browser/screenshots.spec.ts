@@ -40,7 +40,8 @@ async function walk(page: Page, s: TestStore, url: (p: string) => string, look: 
 	await expect(page.locator('.totals')).toContainText('$29.73');
 	await shoot(page, `${look}-cart`);
 	await page.goto(url('/checkout'));
-	await expect(page.locator('.summary .grand')).toContainText('$36.86');
+	// delivery (the default when on): $29.73 + tax $1.78 + 18% tip $5.35 + the new store's $4 delivery fee
+	await expect(page.locator('.summary .grand')).toContainText('$40.86');
 	await shoot(page, `${look}-checkout`);
 
 	const o = await apiOrder(page, s);

@@ -136,7 +136,7 @@ test('delivery with cash: address fields, driver notes, delivery fee line, place
 	await expect(page.getByRole('radio', { name: /ASAP/ })).toContainText('~45 min');
 	await page.getByRole('radio', { name: 'Cash to the driver' }).click();
 	await expect(page.getByRole('heading', { name: /Tip your driver/ })).toHaveCount(0);
-	await expect(page.locator('.summary .totals')).toContainText('Delivery fee$0.00');
+	await expect(page.locator('.summary .totals')).toContainText('Delivery fee$4.00'); // a new store's default (main)
 	await fillDetails(page);
 	await place(page).click();
 	await expect(page).toHaveURL(/\/order\//);
