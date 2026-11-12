@@ -92,8 +92,10 @@ describe('ordering durability', { skip: up ? false : `main isn't reachable at ${
 
 	test('the kitchen is offline: /api/store says so and ASAP orders are refused; back when the Pi is', async () => {
 		await deviceKey(off, { stream: false }); // a Pi is set up, and isn't connected
-		// the storefront re-reads a store's status at most every 10 s
-		await until('the kitchen offline', async () => (await srv.req(off.host, '/api/store')).json().kitchen_offline === true);
+		// the storefront re-reads a store's status at most every 10 s; main counts a Pi away 30 s after its
+		// stream closed — or after main started, for a store it never saw (a main just restarted: air's
+		// rebuild after a sync, a fresh gate stack), so allow both
+		await until('the kitchen offline', async () => (await srv.req(off.host, '/api/store')).json().kitchen_offline === true, 50_000);
 		const r = await srv.req(off.host, '/api/orders', { body: order(off), headers: headers() });
 		assert.equal(r.status, 409, r.body);
 		assert.equal(r.json().code, 'kitchen_offline');
