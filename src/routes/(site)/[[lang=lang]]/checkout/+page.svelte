@@ -153,7 +153,7 @@
 	let quoteSeq = 0;
 	$effect(() => {
 		const lines = $state.snapshot(cart.entries).map((e) => e.line);
-		const body = { type: cart.fulfil, payment: pay, lines, code: code.trim(), ...tipBody };
+		const body = { type: cart.fulfil, payment: pay, lines, coupons: $state.snapshot(cart.coupons), code: code.trim(), ...tipBody };
 		if (!cart.ready || !lines.length) return;
 		const ctl = new AbortController();
 		const seq = ++quoteSeq;
@@ -276,6 +276,7 @@
 				client_order_id: cart.clientOrderId,
 				type: cart.fulfil,
 				lines: $state.snapshot(cart.entries).map((x) => x.line),
+				coupons: $state.snapshot(cart.coupons),
 				code: code.trim(),
 				...tipBody,
 				payment: p,
@@ -522,12 +523,13 @@
 			<ul class="lines">
 				{#each cart.entries as e, i (i)}
 					{@const q = quote?.lines.find((x) => x.index === i)}
-					<li class="line"><span class="qty">{e.line.qty ?? 1}</span><div class="txt"><span class="nm">{e.name}</span>{#if e.mods.length}<span class="mods">{e.mods.join(' · ')}</span>{/if}</div><span class="pr num">{money(q?.total_cents ?? e.unitCents * (e.line.qty ?? 1))}</span></li>
+					<li class="line"><span class="qty">{e.line.qty ?? 1}</span><div class="txt"><span class="nm">{e.name}{#if quote?.coupons?.some((c) => c.lines.includes(i))}{' '}<span class="tag tag-brand">{T('coupon')}</span>{/if}</span>{#if e.mods.length}<span class="mods">{e.mods.join(' · ')}</span>{/if}</div><span class="pr num">{money(q?.total_cents ?? e.unitCents * (e.line.qty ?? 1))}</span></li>
 				{/each}
 			</ul>
 			<label class="field promo"><span>{T('promo')}</span><input bind:value={code} onchange={() => cart.setCode(code.trim())} autocapitalize="characters" /></label>
 			{#if quote}
 				<div class="totals" aria-live="polite" class:stale={quoting}>
+					{#each quote.coupons ?? [] as c (c.index)}<div class="cpn"><span>{T('coupon')}: {c.name}</span><span class="num">{money(c.total_cents)}</span></div>{/each}
 					<div><span>{T('subtotal')}</span><span class="num">{money(quote.subtotal_cents)}</span></div>
 					{#each quote.discounts as d (d.label)}<div class="disc"><span>{d.label}</span><span class="num">−{money(d.amount_cents)}</span></div>{/each}
 					{#if deliv}<div><span>{T('deliveryFee')}</span><span class="num">{money(quote.delivery_fee_cents)}</span></div>{/if}

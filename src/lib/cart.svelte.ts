@@ -2,6 +2,13 @@
 // what the customer sees at checkout always comes from main's /quote.
 import type { CartEntry, Fulfil } from './types';
 
+/** A coupon the customer applied: main's cart coupon (a coupon deal + the cart line units it takes, one
+ * index per unit), as the quote's coupon_offers give it. A coupon re-prices its lines (never a discount). */
+export interface CartCoupon {
+	id: string;
+	lines: number[];
+}
+
 const KEY = 'qcart2';
 const keyOf = (e: CartEntry) => JSON.stringify({ ...e.line, qty: 0 });
 
@@ -9,6 +16,7 @@ class Cart {
 	entries = $state<CartEntry[]>([]);
 	fulfil = $state<Fulfil>('pickup');
 	code = $state('');
+	coupons = $state<CartCoupon[]>([]);
 	bump = $state(0);
 	ready = $state(false);
 	/** One idempotency key per cart: kept across retries of an unanswered attempt (and 3-D Secure),
@@ -26,6 +34,7 @@ class Cart {
 			if (raw && Date.now() - raw.at < 24 * 3600_000) {
 				this.entries = raw.entries ?? [];
 				this.code = raw.code ?? '';
+				this.coupons = Array.isArray(raw.coupons) ? raw.coupons : [];
 				this.clientOrderId = raw.cid ?? '';
 				this.pending = raw.pend ?? '';
 				this.fulfil = allowed.includes(raw.fulfil) ? raw.fulfil : defaultFulfil;
@@ -38,7 +47,7 @@ class Cart {
 	}
 	save() {
 		try {
-			localStorage.setItem(KEY, JSON.stringify({ entries: this.entries, fulfil: this.fulfil, code: this.code, cid: this.clientOrderId, pend: this.pending, at: Date.now() }));
+			localStorage.setItem(KEY, JSON.stringify({ entries: this.entries, fulfil: this.fulfil, code: this.code, coupons: this.coupons, cid: this.clientOrderId, pend: this.pending, at: Date.now() }));
 		} catch {
 			/* private mode: the cart still works for this visit */
 		}
@@ -57,13 +66,40 @@ class Cart {
 		this.changed();
 	}
 	setQty(i: number, qty: number) {
-		if (qty <= 0) this.entries.splice(i, 1);
-		else this.entries[i].line.qty = Math.min(50, qty);
+		if (qty <= 0) {
+			this.entries.splice(i, 1);
+			// a coupon that took the line goes; the others follow the lines after it down
+			this.coupons = this.coupons.filter((c) => !c.lines.includes(i)).map((c) => ({ ...c, lines: c.lines.map((x) => (x > i ? x - 1 : x)) }));
+		} else {
+			this.entries[i].line.qty = Math.min(50, qty);
+			// fewer units than a coupon takes of the line: that coupon goes
+			const n = this.entries[i].line.qty ?? 1;
+			this.coupons = this.coupons.filter((c) => c.lines.filter((x) => x === i).length <= n);
+		}
 		this.changed();
 	}
 	replace(entries: CartEntry[]) {
 		this.entries = entries;
+		this.coupons = [];
 		this.changed();
+	}
+	/** Applies a coupon main offered (its id + the units it takes). */
+	applyCoupon(c: CartCoupon) {
+		this.coupons = [...this.coupons.filter((x) => x.id !== c.id || x.lines.join() !== c.lines.join()), { id: c.id, lines: [...c.lines] }];
+		this.changed();
+	}
+	/** Takes the n-th applied coupon off (its lines go back to their own prices). */
+	removeCoupon(n: number) {
+		this.coupons = this.coupons.filter((_, k) => k !== n);
+		this.changed();
+	}
+	/** Keeps only the coupons main applied (by their index in cart.coupons): the rest no longer fit. */
+	keepCoupons(applied: number[]) {
+		const next = this.coupons.filter((_, k) => applied.includes(k));
+		if (next.length === this.coupons.length) return false;
+		this.coupons = next;
+		this.changed();
+		return true;
 	}
 	/** A final refusal ends the key: the next attempt is a new order. */
 	renewKey() {
@@ -86,6 +122,7 @@ class Cart {
 	clear() {
 		this.entries = [];
 		this.code = '';
+		this.coupons = [];
 		this.pending = '';
 		this.changed();
 	}

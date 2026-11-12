@@ -156,6 +156,29 @@ describe('storefront on main', { skip: up ? false : `main isn't reachable at ${M
 		assert.equal((await srv.req(a.host, '/api/account', { headers: { cookie } })).json().account, null);
 	});
 
+	test('coupons on the website (the owner, 2026-11-12): offered, applied (they re-price their lines), the order priced with them', async () => {
+		const { addCoupon } = await import('../browser/api.ts');
+		await addCoupon(a); // 16" Pizza + Wings $19.99, every channel kind
+		const ls = [lines()[0], { ...lines()[1], qty: 1 }];
+		const q = (await srv.req(a.host, '/api/quote', { body: { type: 'pickup', lines: ls } })).json();
+		const [offer] = q.coupon_offers;
+		assert.equal(offer.name, '16" Pizza + Wings');
+		assert.deepEqual(offer.lines, [0, 1]);
+		const coupons = [{ id: offer.id, lines: offer.lines }];
+		const qc = (await srv.req(a.host, '/api/quote', { body: { type: 'pickup', lines: ls, coupons } })).json();
+		assert.deepEqual(qc.errors, []);
+		assert.deepEqual(qc.lines.map((l: { total_cents: number }) => l.total_cents), [1999 + 225, 50]);
+		assert.equal(qc.subtotal_cents, 1999 + 225 + 50);
+		assert.deepEqual(qc.discounts, []);
+		const r = await srv.req(a.host, '/api/orders', { body: order({ lines: ls, coupons, expected_total_cents: qc.total_cents }) });
+		assert.equal(r.status, 201, r.body);
+		assert.equal(r.json().money.subtotal_cents, qc.subtotal_cents);
+		// a coupon that doesn't fit as sent refuses the order
+		const bad = await srv.req(a.host, '/api/orders', { body: order({ lines: [ls[0]], coupons }) });
+		assert.equal(bad.status, 422, bad.body);
+		assert.equal(bad.json().code, 'cart_invalid');
+	});
+
 	test('live store status and a pause show up', async () => {
 		const s = (await srv.req(a.host, '/api/store')).json();
 		assert.ok(['open', 'closed', 'paused'].includes(s.state));

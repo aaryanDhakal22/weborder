@@ -82,6 +82,23 @@ export async function addDeals(s: TestStore) {
 	return { bundle, nth, code };
 }
 
+/** A coupon on every channel (the owner, 2026-11-12: coupons work on the website too): item families
+ * Pizza + Wings and "16" Pizza + Wings" at $19.99 — it re-prices its lines (never a discount). */
+export async function addCoupon(s: TestStore, price = 1999) {
+	const m = s.menu;
+	const fam = async (name: string, items: string[]) => {
+		const f = (await s.me('POST', '/menu/families', { kind: 'item', name }, 201)).data;
+		await s.me('POST', '/menu/families/assign', { family_id: f.id, items }, 200);
+		return f;
+	};
+	const pizza = await fam('Pizza', [m.pizza.id]);
+	const wings = await fam('Wings', [m.wings.id]);
+	return (await s.me('POST', '/deals', { kind: 'coupon', name: '16" Pizza + Wings', active: true, price_cents: price,
+		card: ['16" pizza', 'Wings'], channel_kinds: ['web', 'operator', 'counter'],
+		parts: [{ label: '16" pizza', families: [pizza.id], sizes: [m.s16.id], qty: 1, regular_mods_included: 0 },
+			{ label: 'Wings', families: [wings.id], qty: 1, regular_mods_included: 0 }] }, 201)).data;
+}
+
 export const pause = (s: TestStore, preset = 'indefinite', note = '') => s.me('POST', '/pause', { preset, note }, 200);
 
 /** Closed all day today (store-local), so the store reads "closed" with a next opening. */

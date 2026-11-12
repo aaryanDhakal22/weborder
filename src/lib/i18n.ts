@@ -22,6 +22,7 @@ const en = {
 	dealOff: "This deal isn't on right now.", next: 'Next', addDeal: 'Add deal to order', youSave: 'You save', step: 'Step {a} of {b}', nowPicking: 'Now picking',
 	dealDone: 'Deal complete!', buildAnother: 'Build another', included: '{n} included', usually: 'usually', nothingFits: 'Nothing on the menu fits this step right now.',
 	useCode: 'Use code {c} at checkout.', minSubtotal: 'on orders over {m}', appliesItself: 'It applies by itself in your cart. These count:', deal: 'Deal',
+	coupon: 'Coupon', couponsFor: 'Coupons for your order', applyCoupon: 'Apply', removeCoupon: 'Remove coupon', couponGone: 'A coupon no longer fits your order: it was taken off.',
 	// cart
 	yourOrder: 'Your order', viewOrder: 'View order', checkout: 'Checkout', goCheckout: 'Go to checkout', goesWith: 'Goes well with',
 	subtotal: 'Subtotal', tax: 'Tax', tip: 'Tip', deliveryFee: 'Delivery fee', serviceFee: 'Service fee', cardFee: 'Card fee ({p}%)', total: 'Total', savedYou: 'Deals saved you {m}', promo: 'Promo code',
@@ -89,6 +90,7 @@ const es: Dict = {
 	dealOff: 'Esta oferta no está disponible ahora mismo.', next: 'Siguiente', addDeal: 'Agregar al pedido', youSave: 'Ahorras', step: 'Paso {a} de {b}', nowPicking: 'Eligiendo',
 	dealDone: '¡Oferta completa!', buildAnother: 'Armar otra', included: '{n} incluido', usually: 'normal', nothingFits: 'Nada del menú sirve para este paso ahora.',
 	useCode: 'Usa el código {c} al pagar.', minSubtotal: 'en pedidos de más de {m}', appliesItself: 'Se aplica sola en el carrito. Estos cuentan:', deal: 'Oferta',
+	coupon: 'Cupón', couponsFor: 'Cupones para tu pedido', applyCoupon: 'Aplicar', removeCoupon: 'Quitar cupón', couponGone: 'Un cupón ya no cabe en tu pedido: se quitó.',
 	yourOrder: 'Tu pedido', viewOrder: 'Ver pedido', checkout: 'Pagar', goCheckout: 'Ir a pagar', goesWith: 'Va bien con',
 	subtotal: 'Subtotal', tax: 'Impuesto', tip: 'Propina', deliveryFee: 'Envío', serviceFee: 'Cargo de servicio', cardFee: 'Cargo por tarjeta ({p}%)', total: 'Total', savedYou: 'Ahorraste {m}', promo: 'Código',
 	emptyCart: 'Tu pedido está vacío', emptyCartSub: 'Aún no hay nada. Empieza por el menú.', browse: 'Ver el menú',
