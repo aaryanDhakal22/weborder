@@ -99,6 +99,10 @@ test('the kitchen is offline: the bar, the checkout banner, no ASAP; back when t
 	await deviceKey(s, { stream: false }); // a Pi is set up and isn't connected
 	await page.goto(site.url(s, '/'));
 	const bar = page.locator('.statusbar');
+	// main counts a Pi away 30 s after its stream closed, or after main started for a store it never saw:
+	// a main air just rebuilt after a sync (any main change on a gate stack) needs up to 30 s more, and the
+	// storefront re-reads a store's status at most every 10 s (the e2e test waits the same way)
+	await reloadUntil(page, async () => ((await bar.textContent()) ?? '').includes("The kitchen can't take online orders right now"), 50_000);
 	await expect(bar).toContainText("The kitchen can't take online orders right now");
 	await readyToPlace(page, (p) => site.url(s, p));
 	const banner = page.locator('.kitchen-off');
