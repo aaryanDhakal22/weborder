@@ -3,7 +3,7 @@
 // `/square/oauth/callback`, on any host it answers (it never needs a store: main's signed `state`
 // names the store). The storefront checks the shape of what Square sent, relays `{code, state}` (or
 // `{state, error}` when the owner said no) server to server to main's `POST /square/oauth/forward`
-// with its platform key, and sends the manager's browser to main's answer: Store › Payments with
+// with its platform key, and sends the manager's browser to main's answer: Store › Settings › Payments with
 // `?square=connected|denied|expired|error`. main checks the state's signature and expiry and does
 // the code exchange; nothing is stored here.
 // **The code is never logged or kept**: not in logs, pages or headers, and the browser leaves with
@@ -50,9 +50,9 @@ function page(status: number, title: string, text: string): Response {
 
 const SAFE = { 'cache-control': 'no-store', 'referrer-policy': 'no-referrer', 'x-robots-tag': 'noindex', 'x-content-type-options': 'nosniff' };
 
-const AGAIN = 'Go back to Store › Payments in quicc and press Connect Square again.';
+const AGAIN = 'Go back to Store › Settings › Payments in quicc and press Connect Square again.';
 const RESULT_TEXT: Record<string, [string, string]> = {
-	connected: ['Square is connected', 'You can close this tab and go back to Store › Payments in quicc.'],
+	connected: ['Square is connected', 'You can close this tab and go back to Store › Settings › Payments in quicc.'],
 	denied: ['Square was not connected', `Square wasn't given access. ${AGAIN}`],
 	expired: ['This link expired', `The Square sign-in link is too old or isn't valid. ${AGAIN}`],
 	error: ["Square couldn't be connected", `Something went wrong while connecting. ${AGAIN}`]

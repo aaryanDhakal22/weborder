@@ -1,6 +1,6 @@
 // Square's OAuth redirect relayed through the storefront to a running main (DURABILITY-PLAN.md
 // step 6), with dev main's fake Square playing Square: the owner's code + state reach main only
-// with the platform key, main connects the store, and the browser goes back to Store › Payments.
+// with the platform key, main connects the store, and the browser goes back to Store › Settings › Payments.
 // The code is never in the storefront's output. Skips when main or the fake Square isn't there.
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
