@@ -153,7 +153,10 @@
 	let quoteSeq = 0;
 	$effect(() => {
 		const lines = $state.snapshot(cart.entries).map((e) => e.line);
-		const body = { type: cart.fulfil, payment: pay, lines, coupons: $state.snapshot(cart.coupons), code: code.trim(), ...tipBody };
+		// The delivery fee by distance (main 4.0.6): the distance main's delivery-check found for this address
+		// (main prices the order itself from its own check).
+		const dist = cart.fulfil === 'delivery' && check?.distance_m != null ? { distance_m: check.distance_m } : {};
+		const body = { type: cart.fulfil, payment: pay, lines, coupons: $state.snapshot(cart.coupons), code: code.trim(), ...tipBody, ...dist };
 		if (!cart.ready || !lines.length) return;
 		const ctl = new AbortController();
 		const seq = ++quoteSeq;
