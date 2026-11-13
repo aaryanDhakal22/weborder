@@ -2,19 +2,9 @@
 // header (store hosts, unknown hosts) over node:http.
 import { spawn, type ChildProcess } from 'node:child_process';
 import http from 'node:http';
-import { createServer } from 'node:net';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-export async function freePort(): Promise<number> {
-	return new Promise((resolve) => {
-		const s = createServer().listen(0, () => {
-			const p = (s.address() as { port: number }).port;
-			s.close(() => resolve(p));
-		});
-	});
-}
 
 export interface Res {
 	status: number;
@@ -34,20 +24,44 @@ export class TestServer {
 	output = '';
 
 	async start(env: Record<string, string>, o: { capture?: boolean } = {}) {
-		this.port = await freePort();
+		// PORT=0: the server binds a free port itself and says which ("Listening on http://…:N"). Picking
+		// one here and handing it over raced with every other process on the box: on grace the gate's
+		// other storefront lane took it in between (EADDRINUSE, gate 20261113-140031), and the ready poll
+		// below then talked to that one's server.
 		this.dataDir = mkdtempSync(join(tmpdir(), 'storefront-test-'));
-		this.proc = spawn(process.execPath, ['build'], {
+		const proc = spawn(process.execPath, ['build'], {
 			cwd: new URL('../..', import.meta.url).pathname,
-			env: { ...process.env, PORT: String(this.port), REFRESH_SECONDS: '5', OUTBOX_PATH: join(this.dataDir, 'outbox.db'), ...env },
-			stdio: o.capture ? ['ignore', 'pipe', 'pipe'] : ['ignore', 'ignore', 'inherit']
+			env: { ...process.env, PORT: '0', REFRESH_SECONDS: '5', OUTBOX_PATH: join(this.dataDir, 'outbox.db'), ...env },
+			stdio: ['ignore', 'pipe', o.capture ? 'pipe' : 'inherit']
+		});
+		this.proc = proc;
+		let out = '';
+		const listening = new Promise<number>((resolve, reject) => {
+			const timer = setTimeout(() => reject(new Error(`server did not start:\n${out}`)), 15_000);
+			let up = false;
+			proc.stdout?.on('data', (c) => {
+				if (o.capture) this.output += c;
+				if (up) return; // drained, not kept
+				out += c;
+				const m = /Listening on http:\/\/[^\s]*:(\d+)/.exec(out);
+				if (m) {
+					up = true;
+					clearTimeout(timer);
+					resolve(Number(m[1]));
+				}
+			});
+			proc.on('exit', (code) => {
+				clearTimeout(timer);
+				reject(new Error(`server exited (${code}) before listening:\n${out}`));
+			});
 		});
 		if (o.capture) {
-			this.proc.stdout?.on('data', (c) => (this.output += c));
-			this.proc.stderr?.on('data', (c) => {
+			proc.stderr?.on('data', (c) => {
 				this.output += c;
 				process.stderr.write(c);
 			});
 		}
+		this.port = await listening;
 		for (let i = 0; i < 100; i++) {
 			try {
 				await this.req('nobody.localhost', '/');
@@ -56,7 +70,7 @@ export class TestServer {
 				await new Promise((r) => setTimeout(r, 100));
 			}
 		}
-		throw new Error('server did not start');
+		throw new Error('server did not answer');
 	}
 
 	stop() {
