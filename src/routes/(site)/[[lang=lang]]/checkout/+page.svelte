@@ -256,9 +256,24 @@
 		document.getElementById('failure')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 	}
 
+	// A tap on Place order while a new quote is on its way (a tip, address or card change a moment
+	// earlier; slow on a loaded phone) is kept and placed as soon as the quote is back, never dropped:
+	// it used to return silently, so Place order "did nothing" (2026-11-14).
+	let placeAfterQuote = $state(false);
+	$effect(() => {
+		if (!quoting && placeAfterQuote) {
+			placeAfterQuote = false;
+			void place();
+		}
+	});
+
 	async function place(e?: SubmitEvent, payment?: Record<string, unknown>) {
 		e?.preventDefault();
-		if (busy || quoting || asapBlocked) return;
+		if (busy || asapBlocked) return;
+		if (quoting) {
+			if (!payment) placeAfterQuote = true;
+			return;
+		}
 		failure = null;
 		if (missing) {
 			failure = { code: 'missing', message: T('fillIn', { f: missing }) };

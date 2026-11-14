@@ -69,6 +69,28 @@ test('pickup, ASAP, test card with the default 18% tip: totals from main, placed
 	await expect(page).not.toHaveURL(/\/checkout$/);
 });
 
+test('Place order tapped while the quote is still on its way: kept and placed once the quote is back, never dropped', async ({ page, site, shop }) => {
+	// The owner's phones under load (release gate 2026-11-14): a tap that landed while a new quote was on its way
+	// returned silently and the page just sat there.
+	await cartOf(page, (p) => site.url(shop, p));
+	await page.getByRole('radio', { name: 'Pickup', exact: true }).last().click();
+	await fillDetails(page);
+	await expect(page.locator('.summary .totals')).not.toHaveClass(/stale/);
+	let release!: () => void;
+	const held = new Promise<void>((r) => (release = r));
+	await page.route('**/api/quote', async (route) => {
+		await held;
+		await route.continue();
+	});
+	await page.locator('.tipchips').getByRole('radio', { name: /20%/ }).click(); // a new quote, held back
+	await expect(page.locator('.summary .totals')).toHaveClass(/stale/);
+	await page.locator('form.co-grid').evaluate((f: HTMLFormElement) => f.requestSubmit()); // the tap, mid-quote
+	await page.waitForTimeout(300); // intentional: nothing may be placed before the quote is back
+	await expect(page).toHaveURL(/\/checkout$/);
+	release();
+	await expect(page).toHaveURL(/\/order\/[A-Za-z0-9_-]+$/, { timeout: 30_000 });
+});
+
 test('tips: custom amount, no tip, and none at all for cash', async ({ page, site, shop }) => {
 	await cartOf(page, (p) => site.url(shop, p));
 	const totals = page.locator('.summary .totals');
