@@ -281,7 +281,9 @@ test('signed in: name and phone filled, saved address, save the card, then pay w
 	await expect(page.getByRole('radiogroup', { name: 'Saved cards' })).toHaveCount(0);
 	await page.getByLabel('Save this card for next time').check();
 	await place(page).click();
-	await expect(page).toHaveURL(/\/order\//);
+	// A card order is a placement main may answer only after the hold (up to ~25 s by design, main's order
+	// placements): under a loaded release gate 8 s was too short (20261113-211744, 20261114-064640).
+	await expect(page).toHaveURL(/\/order\//, { timeout: 30_000 });
 
 	await cartOf(page, (p) => site.url(s, p));
 	const cards = page.getByRole('radiogroup', { name: 'Saved cards' });
@@ -292,7 +294,9 @@ test('signed in: name and phone filled, saved address, save the card, then pay w
 	await expect(page.getByLabel('Test card (fake Square)')).toBeVisible();
 	await cards.getByRole('radio').first().click();
 	await place(page).click();
-	await expect(page).toHaveURL(/\/order\//);
+	// A card order is a placement main may answer only after the hold (up to ~25 s by design, main's order
+	// placements): under a loaded release gate 8 s was too short (20261113-211744, 20261114-064640).
+	await expect(page).toHaveURL(/\/order\//, { timeout: 30_000 });
 });
 
 test('"Have an account? Sign in" goes to sign-in and comes back to checkout', async ({ page, site, shop }) => {
