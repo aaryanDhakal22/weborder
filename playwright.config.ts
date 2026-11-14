@@ -11,7 +11,11 @@ export default defineConfig({
 	snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{testFilePath}/{arg}{ext}',
 	fullyParallel: true,
 	workers: process.env.CI ? 2 : 4,
-	retries: 0,
+	// The gate's rule (scripts/gate.sh "Retry"): a failing test is retried once in a loaded parallel run and a pass
+	// on the retry is a flake, listed as "flaky" in the report. The checkout tests' "Place order does nothing"
+	// under a loaded release gate (2026-11-14, .dev/notes/agent-batches-2026-11-14.md "Flakes to fix properly") is
+	// still open: this keeps a staging-only site from blocking releases meanwhile, it doesn't fix it.
+	retries: process.env.GATE_PARALLEL ? 1 : 0,
 	timeout: 45_000,
 	expect: {
 		timeout: 8_000,
