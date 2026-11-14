@@ -185,6 +185,9 @@ test('main says outside the area at Place order: Miso, Switch to pickup', async 
 	await page.getByLabel('Street address').fill('9 Far Rd');
 	await page.getByLabel('ZIP').fill('21204');
 	await fillDetails(page);
+	// Under load the quote for the new address can still be on its way: tap Place order once it has settled
+	// (a flake on a loaded grace, release gate 20261114-063746).
+	await expect(page.locator('.summary .totals')).not.toHaveClass(/stale/);
 	await place(page).click();
 	const fail = page.locator('#failure');
 	await expect(fail).toContainText("We can't reach that far… yet");
